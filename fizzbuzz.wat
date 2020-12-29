@@ -15,8 +15,7 @@
 
     (local.set $i (i32.add (local.get $i) (i32.const 1))) ;; increment $i
 
-    (i32.lt_s (local.get $i) (i32.const 100))
-    br_if $countToHundred
+    (br_if $countToHundred (i32.lt_s (local.get $i) (i32.const 100))) ;; continue loop if $i < 100
   end
 )
 (start $main)
