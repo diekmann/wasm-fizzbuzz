@@ -2,9 +2,24 @@
 <html>
   <body>
     <script>
-      var importObject = { host: { print: arg => console.log(arg) } };
+      var importObject = { host: { print: function(arg) {
+          switch (arg) {
+            case -1:
+              arg = "fizz";
+              break
+            case -2:
+              arg = "buzz";
+              break;
+            case -3:
+              arg = "fizzbuzz";
+              break;
+            default:
+              arg = arg.toString();
+          }
+          console.log(arg);
+      } } };
 
-      WebAssembly.instantiateStreaming(fetch('fizzbuzz.wasm'), importObject)
+      WebAssembly.instantiateStreaming(fetch('fizzbuzz.wasm'), importObject);
     </script>
   </body>
 </html>
