@@ -1,7 +1,5 @@
 (module
-
-;; debugging
-(import "host" "print" (func $hprint (param i32)))
+(import "host" "print" (func $hprint (param i32))) ;; print function from environment.
 
 ;; TODO: print strings instead of numbers
 (func $fizzbuzz (param $n i32)
