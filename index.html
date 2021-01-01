@@ -1,7 +1,12 @@
 <!doctype html>
 <html>
   <body>
+    <div id="stdout">Stdout: </div>
     <script>
+      const stdout = document.getElementById("stdout");
+      const puts = function(str) {
+        stdout.innerHTML += str + "<br>";
+      }
       var importObject = { host: { print: function(arg) {
           switch (arg) {
             case -1:
@@ -14,9 +19,9 @@
               arg = "fizzbuzz";
               break;
             default:
-              arg = arg.toString();
+              arg = arg.toString()
           }
-          console.log(arg);
+          puts(arg);
       } } };
 
       WebAssembly.instantiateStreaming(fetch('fizzbuzz.wasm'), importObject);
