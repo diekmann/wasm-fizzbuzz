@@ -4,25 +4,17 @@
     <div id="stdout">Stdout: </div>
     <script>
       const stdout = document.getElementById("stdout");
-      const puts = function(str) {
-        stdout.innerHTML += str + "<br>";
+      const putchar = function(chr) {
+        if (chr == 0) {
+          console.log("warning: NULL")
+        }
+        var c = String.fromCharCode(chr);
+        if (c == '\n') {
+          c = "<br>";
+        }
+        stdout.innerHTML += c;
       }
-      var importObject = { host: { print: function(arg) {
-          switch (arg) {
-            case -1:
-              arg = "fizz";
-              break
-            case -2:
-              arg = "buzz";
-              break;
-            case -3:
-              arg = "fizzbuzz";
-              break;
-            default:
-              arg = arg.toString()
-          }
-          puts(arg);
-      } } };
+      var importObject = { host: { putchar: putchar } };
 
       WebAssembly.instantiateStreaming(fetch('fizzbuzz.wasm'), importObject);
     </script>
