@@ -2,15 +2,16 @@
 #![no_main] // There is no runtime, we define our own entry point
 use core::panic::PanicInfo;
 
-fn putchar(_c: i32){
-    // TODO: import from env.
+#[link(wasm_import_module = "host")]
+extern "C" {
+    fn putchar(c: i32);
 }
 
 fn puts(str: &str) {
     for c in str.chars() {
-        putchar(c as i32);
+        unsafe {putchar(c as i32)};
     }
-    putchar('\n' as i32);
+    unsafe {putchar('\n' as i32)};
 }
 
 fn int_to_ascii(_i: i32) -> &'static str{
