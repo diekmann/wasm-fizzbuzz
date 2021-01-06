@@ -2,7 +2,7 @@
 #![no_main] // There is no runtime, we define our own entry point
 use core::panic::PanicInfo;
 
-fn putchar(c: i32){
+fn putchar(_c: i32){
     // TODO: import from env.
 }
 
@@ -13,7 +13,7 @@ fn puts(str: &str) {
     putchar('\n' as i32);
 }
 
-fn int_to_ascii(i: i32) -> &'static str{
+fn int_to_ascii(_i: i32) -> &'static str{
     //TODO
     return "TODO itoa"
 }
