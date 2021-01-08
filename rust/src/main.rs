@@ -56,14 +56,16 @@ fn panic(_info: &PanicInfo) -> ! {
     loop{};
 }
 
+const FIZZBUZZ: &[u8; 8] = b"fizzbuzz";
+
 fn fizzbuzz(n: i32){
     let mut buf: [u8; 11] = [0; 11];
     if n % 15 == 0 {
-        puts(b"fizzbuzz");
+        puts(FIZZBUZZ);
     } else if n % 5 == 0 {
-        puts(b"buzz");
+        puts(&FIZZBUZZ[4..]); // buzz
     } else if n % 3 == 0 {
-        puts(b"fizz");
+        puts(&FIZZBUZZ[..4]); // fizz
     } else {
         let length = int_to_ascii(&mut buf, n);
         puts(&buf[0..length]);
