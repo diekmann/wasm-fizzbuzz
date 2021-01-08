@@ -1,4 +1,4 @@
-#![no_std]  // No implicit linking to the std lib.
+#![cfg_attr(not(test), no_std)]  // No implicit linking to the std lib, except for tests.
 #![cfg_attr(not(test), no_main)] // Outside tests, there is no runtime, we define our own entry point
 use core::panic::PanicInfo;
 
@@ -36,10 +36,16 @@ fn int_to_ascii(buf: &mut [u8], mut i: i32) -> usize{
 
 #[cfg(test)]
 mod tests {
+    use std::str;
+    use crate::int_to_ascii;
+
     #[test]
     fn it_works() {
-        assert_eq!(2 + 2, 4);
-        //TODO use std::str::from_utf8_unchecked to convert &[u8] -> &str
+        let mut buf: [u8; 11] = [0; 11];
+        let len = int_to_ascii(&mut buf, 42);
+        assert_eq!(str::from_utf8(&buf[0..len]), Ok("0000000042"));
+
+        //TODO: I really like Golang's table-driven tests, can I get the same in rust without macro magic?
     }
 }
 
