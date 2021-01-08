@@ -1,6 +1,6 @@
 # Writing WebAssembly Hy Hand
 
-This doc thread is based on https://developer.mozilla.org/en-US/docs/WebAssembly.
+This doc is based on https://developer.mozilla.org/en-US/docs/WebAssembly.
 
 ---
 
