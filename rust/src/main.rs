@@ -17,10 +17,18 @@ fn puts(str: &[u8]) {
 // writes ASCII number to buf, returns length of string.
 // buf must be large enough. 11 bytes should be enough
 // to hold the string representation (including sign) of an i32.
-fn int_to_ascii(buf: &mut [u8], _i: i32) -> usize{
+fn int_to_ascii(buf: &mut [u8], mut i: i32) -> usize{
     let mut len: usize = 0;
-    for c in b"TODO itoa".iter(){
-        buf[len] = *c;
+    let mut div: i32 = 1000000000; // yolo
+    if i < 0 {
+        buf[len] = b'-';
+        len += 1;
+        i *= -1; // i should not be INT_MIN.
+    }
+    while div >= 1 {
+        buf[len] = b'0' + ((i / div) as u8);
+        i %= div;
+        div /= 10;
         len += 1;
     }
     return len
