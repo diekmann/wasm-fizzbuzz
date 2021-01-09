@@ -37,15 +37,39 @@ fn int_to_ascii(buf: &mut [u8], mut i: i32) -> usize{
 #[cfg(test)]
 mod tests {
     use std::str;
-    use crate::int_to_ascii;
+    use super::*;
+
+    macro_rules! assert_int_to_ascii {
+        ($input:expr, $want:expr) => {
+            let mut buf: [u8; 11] = [0; 11];
+            let length = int_to_ascii(&mut buf, $input);
+            let got = str::from_utf8(&buf[..length]);
+            assert_eq!(got, Ok($want));
+        }
+    }
 
     #[test]
-    fn it_works() {
-        let mut buf: [u8; 11] = [0; 11];
-        let len = int_to_ascii(&mut buf, 42);
-        assert_eq!(str::from_utf8(&buf[0..len]), Ok("0000000042"));
+    fn int_to_ascii_positive() {
+        assert_int_to_ascii!(0, "0000000000");
+        assert_int_to_ascii!(42, "0000000042");
+        assert_int_to_ascii!(15, "0000000015");
+        assert_int_to_ascii!(2147483647, "2147483647");
+        assert_int_to_ascii!(std::i32::MAX, "2147483647");
+    }
 
-        //TODO: I really like Golang's table-driven tests, can I get the same in rust without macro magic?
+    #[test]
+    fn int_to_ascii_negative() {
+        assert_int_to_ascii!(-0, "0000000000");
+        assert_int_to_ascii!(-42, "-0000000042");
+        assert_int_to_ascii!(-15, "-0000000015");
+        assert_int_to_ascii!(-2147483647, "-2147483647");
+        assert_int_to_ascii!(-std::i32::MAX, "-2147483647");
+    }
+
+    #[test]
+    #[should_panic(expected = "attempt to multiply with overflow")]
+    fn int_to_ascii_bug() {
+        assert_int_to_ascii!(std::i32::MIN, "-2147483648");
     }
 }
 
