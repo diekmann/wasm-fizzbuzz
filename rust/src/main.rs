@@ -20,15 +20,25 @@ fn puts(str: &[u8]) {
 fn int_to_ascii(buf: &mut [u8], mut i: i32) -> usize{
     let mut len: usize = 0;
     let mut div: i32 = 1000000000; // yolo
+    if i == 0 { // special case, since loop below skips leading zeros.
+        buf[0] = b'0';
+        return 1;
+    }
     if i < 0 {
         buf[len] = b'-';
         len += 1;
         i *= -1; // i should not be INT_MIN.
     }
+    let mut skip_zeros = true; // do no print leading zeros.
     while div >= 1 {
-        buf[len] = b'0' + ((i / div) as u8);
+        let the_digit = i/div;
         i %= div;
         div /= 10;
+        skip_zeros = skip_zeros && the_digit == 0;
+        if skip_zeros {
+            continue
+        }
+        buf[len] = b'0' + (the_digit as u8);
         len += 1;
     }
     return len
@@ -50,18 +60,20 @@ mod tests {
 
     #[test]
     fn int_to_ascii_positive() {
-        assert_int_to_ascii!(0, "0000000000");
-        assert_int_to_ascii!(42, "0000000042");
-        assert_int_to_ascii!(15, "0000000015");
+        assert_int_to_ascii!(0, "0");
+        assert_int_to_ascii!(42, "42");
+        assert_int_to_ascii!(4200, "4200");
+        assert_int_to_ascii!(15, "15");
         assert_int_to_ascii!(2147483647, "2147483647");
         assert_int_to_ascii!(std::i32::MAX, "2147483647");
     }
 
     #[test]
     fn int_to_ascii_negative() {
-        assert_int_to_ascii!(-0, "0000000000");
-        assert_int_to_ascii!(-42, "-0000000042");
-        assert_int_to_ascii!(-15, "-0000000015");
+        assert_int_to_ascii!(-0, "0");
+        assert_int_to_ascii!(-42, "-42");
+        assert_int_to_ascii!(-4200, "-4200");
+        assert_int_to_ascii!(-15, "-15");
         assert_int_to_ascii!(-2147483647, "-2147483647");
         assert_int_to_ascii!(-std::i32::MAX, "-2147483647");
     }
