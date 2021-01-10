@@ -2,10 +2,13 @@
 #![cfg_attr(not(test), no_main)] // Outside tests, there is no runtime, we define our own entry point
 use core::panic::PanicInfo;
 
+#[cfg(not(test))]
 #[link(wasm_import_module = "host")]
 extern "C" {
     fn putchar(c: i32);
 }
+#[cfg(test)]
+use tests::putchar; // use a fake in tests.
 
 fn puts(str: &[u8]) {
     for c in str.iter() {
@@ -82,6 +85,63 @@ mod tests {
     #[should_panic(expected = "attempt to multiply with overflow")]
     fn int_to_ascii_bug() {
         assert_int_to_ascii!(std::i32::MIN, "-2147483648");
+    }
+
+
+    // fake putchar implementation for testing.
+    static mut PUTCHAR_BUF: [u8; 1024] = [0; 1024];
+    static mut PUTCHAR_BUF_IDX: usize = 0;
+    pub unsafe fn putchar(c: i32) {
+        PUTCHAR_BUF[PUTCHAR_BUF_IDX] = c as u8;
+        PUTCHAR_BUF_IDX += 1;
+    }
+
+    macro_rules! assert_fizzbuzz {
+        ($input:expr, $want:expr) => {
+            unsafe { PUTCHAR_BUF = [0;1024]; PUTCHAR_BUF_IDX = 0; } // reset fake buffer.
+            fizzbuzz($input); // function under test, writing to fake buffer.
+            let printed_str = unsafe { str::from_utf8(&PUTCHAR_BUF[..PUTCHAR_BUF_IDX]).expect("PUTCHAR_BUF invalid utf8") };
+            assert_eq!(printed_str, $want);
+        }
+    }
+    #[test]
+    fn fizzbuzz_printing() {
+        assert_fizzbuzz!(1, "1\n");
+        assert_fizzbuzz!(2, "2\n");
+        assert_fizzbuzz!(3, "fizz\n");
+        assert_fizzbuzz!(4, "4\n");
+        assert_fizzbuzz!(5, "buzz\n");
+        assert_fizzbuzz!(6, "fizz\n");
+        assert_fizzbuzz!(7, "7\n");
+        assert_fizzbuzz!(8, "8\n");
+        assert_fizzbuzz!(9, "fizz\n");
+        assert_fizzbuzz!(10, "buzz\n");
+        assert_fizzbuzz!(11, "11\n");
+        assert_fizzbuzz!(12, "fizz\n");
+        assert_fizzbuzz!(13, "13\n");
+        assert_fizzbuzz!(14, "14\n");
+        assert_fizzbuzz!(15, "fizzbuzz\n");
+        assert_fizzbuzz!(16, "16\n");
+        assert_fizzbuzz!(17, "17\n");
+        assert_fizzbuzz!(18, "fizz\n");
+        assert_fizzbuzz!(19, "19\n");
+        assert_fizzbuzz!(20, "buzz\n");
+        assert_fizzbuzz!(21, "fizz\n");
+        assert_fizzbuzz!(22, "22\n");
+        assert_fizzbuzz!(23, "23\n");
+        assert_fizzbuzz!(24, "fizz\n");
+        assert_fizzbuzz!(25, "buzz\n");
+        assert_fizzbuzz!(26, "26\n");
+        assert_fizzbuzz!(27, "fizz\n");
+        assert_fizzbuzz!(28, "28\n");
+        assert_fizzbuzz!(29, "29\n");
+        assert_fizzbuzz!(30, "fizzbuzz\n");
+        assert_fizzbuzz!(31, "31\n");
+        assert_fizzbuzz!(32, "32\n");
+        assert_fizzbuzz!(33, "fizz\n");
+        assert_fizzbuzz!(34, "34\n");
+        assert_fizzbuzz!(35, "buzz\n");
+        assert_fizzbuzz!(36, "fizz\n");
     }
 }
 
