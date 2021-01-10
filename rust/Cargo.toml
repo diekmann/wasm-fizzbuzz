@@ -7,5 +7,5 @@ edition = "2018"
 [dependencies]
 
 [profile.release]
-# lto = true # this increases the size??
+lto = true
 opt-level = 's'
