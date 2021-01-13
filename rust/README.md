@@ -4,6 +4,7 @@ For convenience, let's switch from writing WebAssembly in assembly to a more hig
 But which one? Many compilers support WebAssembly backends nowadays.
 
 WebAssembly requires explicit memory management. Languages with a runtime or garbage collection (e.g., Golang) require statically compiling their runtime into the wasm binary. While certainly possible (and probably a good idea when targeting WASI), this makes the binary too huge for the web.
+
 ---
 
 Looks like Rust is the language of choice. There are three wasm targets offered by rust.
