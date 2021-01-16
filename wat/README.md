@@ -1,10 +1,12 @@
 # Writing WebAssembly By Hand
 
-This doc is based on https://developer.mozilla.org/en-US/docs/WebAssembly.
+This doc is based on https://developer.mozilla.org/en-US/docs/WebAssembly, in particular, https://developer.mozilla.org/en-US/docs/WebAssembly/Understanding_the_text_format.
+
+
 
 ---
 
-Let's see if I can implement FizzBuzz. Starting with a loop to print the numbers 0..99.
+Let's see if we can implement FizzBuzz. Starting with a loop to print the numbers 0..99.
 
 ![A small WebAssembly loop and a Makefile](../imgs/wasm_fizzbuzz1.png)
 
@@ -53,7 +55,14 @@ Let's get the FizzBuzz running! I'm cheating somewhat, since I moved the string 
 
 ---
 
-Since I don't want to communicate via shared memory, I'll write my own message-passing API :woman_shrugging:. Probably `putchar` and `getchar` will serve as API between browser and wasm. BRB, coding an ugly terminal. Let's start by getting rid of `console.log`. No change to wasm code.
+Since I don't want to communicate via shared memory, I'll write my own message-passing API :woman_shrugging:. Probably `putchar` and `getchar` will serve as API between browser and wasm.
+
+Since I don't want to share memory with the host environment, WebAssembly only supports a limited set of types we can share with the host environment.
+Basically only `i32`, `i64` and floats (both 32bit and 64bit).
+To send a string from WebAssembly to the browser, we will transmit one character as `i32` at a time from WebAssembly to the browser.
+(This is a from-scratch demo, you probably don't want to implement this API in production)
+
+BRB, coding an ugly terminal. Let's start by getting rid of `console.log`. No change to wasm code.
 
 ![wat code](../imgs/wasm_fizzbuzz9.png)
 ![browser](../imgs/wasm_fizzbuzz10.png)
@@ -75,7 +84,7 @@ These may be the worst string functions you will see today. But I know that you 
 ---
 
 Time to switch to a real terminal emulator.
-Thanks to @larsr_h for teaching me how to avoid `npm` with @unpkg.
+Thanks to [@larsr_h](http://twitter.com/larsr_h) for teaching me how to avoid `npm` with unpkg.
 
 ![wat code and index.html](../imgs/wasm_fizzbuzz14.png)
 ![FizzBuzz in the browser](../imgs/wasm_fizzbuzz15.png)
