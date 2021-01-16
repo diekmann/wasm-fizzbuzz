@@ -3,7 +3,7 @@
 For convenience, let's switch from writing WebAssembly in assembly to a more high-level language.
 But which one? Many compilers support WebAssembly backends nowadays.
 
-WebAssembly requires explicit memory management. Languages with a runtime or garbage collection (e.g., Golang) require statically compiling their runtime into the wasm binary. While certainly possible (and probably a good idea when targeting WASI), this makes the binary too huge for the web.
+WebAssembly requires explicit memory management. Languages with a runtime or garbage collection (e.g., Golang) require statically compiling their runtime into the wasm binary. While certainly possible (and probably a good idea when targeting [WASI](https://wasi.dev/)), this makes the binary too huge for the web.
 
 ---
 
@@ -18,11 +18,12 @@ We invented our own API/ABI to talk the the host environment (our API: there is 
 
 I wrote a minimal fizzbuzz in rust. Not nice, but it follows the same structure as the hand-written WebAssembly (which is only 326 bytes) for comparison.
 
+![fizzbuz rust code](../imgs/wasm_fizzbuzz_rust3.png)
+
 The rust-compiled wasms are huge!
 
 Also emscripten is out; this thread explores wasm from scratch, I don't want another linker.
 
-![fizzbuz rust code](../imgs/wasm_fizzbuzz_rust3.png)
 ![compiling to different targets](../imgs/wasm_fizzbuzz_rust4.png)
 
 ---
@@ -33,7 +34,7 @@ Since I want to develop my own API, wasi is out. Though, it does look cool.
 ![wasm2wat](../imgs/wasm_fizzbuzz_rust5.png)
 
 
-OTOH, the pure wasm does not require any functions from the host environment and just runs in `wasm-interp` (see prev screenshot). Downside: Since it's not importing anything, it cannot interact with the host, i.e. it cannot print anything, nor signal success or failure.
+OTOH, the pure wasm does not require any functions from the host environment and just runs in `wasm-interp` (see prev screenshot, well, "run" is a bit of an euphemism, since the rust-generated main function is not executed by `wasm-interp`, but at least, it can be loaded). Downside: Since it's not importing anything, it cannot interact with the host, i.e. it cannot print anything, nor signal success or failure.
 
 For this "from scratch thread", looks like wasm32-unknown-unknown is the target of choice. :smiley:
 
@@ -142,3 +143,9 @@ In the long run, it's never worth to pretend to be clever and fight the toolchai
 Well, reverting to the old `int_to_ascii` function and keeping `lto` on, the binary size would even go down to 319 bytes.
 
 All config options somebody set at some point in time for some reason are outdated! Question everything!
+
+
+---
+
+Looks like we developed a small and working FizzBuzz implementation from scratch.
+Thanks for following along :blush:
