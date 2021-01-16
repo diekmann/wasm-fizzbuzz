@@ -1,4 +1,4 @@
-# Writing WebAssembly Hy Hand
+# Writing WebAssembly By Hand
 
 This doc is based on https://developer.mozilla.org/en-US/docs/WebAssembly.
 
