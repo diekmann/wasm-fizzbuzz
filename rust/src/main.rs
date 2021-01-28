@@ -1,4 +1,4 @@
-#![cfg_attr(not(test), no_std)]  // No implicit linking to the std lib, except for tests.
+#![cfg_attr(not(test), no_std)] // No implicit linking to the std lib, except for tests.
 #![cfg_attr(not(test), no_main)] // Outside tests, there is no runtime, we define our own entry point
 use core::panic::PanicInfo;
 
@@ -12,18 +12,19 @@ use tests::putchar; // use a fake in tests.
 
 fn puts(str: &[u8]) {
     for c in str.iter() {
-        unsafe {putchar(*c as i32)};
+        unsafe { putchar(*c as i32) };
     }
-    unsafe {putchar('\n' as i32)};
+    unsafe { putchar('\n' as i32) };
 }
 
 // writes ASCII number to buf, returns length of string.
 // buf must be large enough. 11 bytes should be enough
 // to hold the string representation (including sign) of an i32.
-fn int_to_ascii(buf: &mut [u8], mut i: i32) -> usize{
+fn int_to_ascii(buf: &mut [u8], mut i: i32) -> usize {
     let mut len: usize = 0;
     let mut div: i32 = 1000000000; // yolo
-    if i == 0 { // special case, since loop below skips leading zeros.
+    if i == 0 {
+        // special case, since loop below skips leading zeros.
         buf[0] = b'0';
         return 1;
     }
@@ -34,23 +35,23 @@ fn int_to_ascii(buf: &mut [u8], mut i: i32) -> usize{
     }
     let mut skip_zeros = true; // do no print leading zeros.
     while div >= 1 {
-        let the_digit = i/div;
+        let the_digit = i / div;
         i %= div;
         div /= 10;
         skip_zeros = skip_zeros && the_digit == 0;
         if skip_zeros {
-            continue
+            continue;
         }
         buf[len] = b'0' + (the_digit as u8);
         len += 1;
     }
-    return len
+    return len;
 }
 
 #[cfg(test)]
 mod tests {
-    use std::str;
     use super::*;
+    use std::str;
 
     macro_rules! assert_int_to_ascii {
         ($input:expr, $want:expr) => {
@@ -58,7 +59,7 @@ mod tests {
             let length = int_to_ascii(&mut buf, $input);
             let got = str::from_utf8(&buf[..length]);
             assert_eq!(got, Ok($want));
-        }
+        };
     }
 
     #[test]
@@ -87,7 +88,6 @@ mod tests {
         assert_int_to_ascii!(std::i32::MIN, "-2147483648");
     }
 
-
     // fake putchar implementation for testing.
     static mut PUTCHAR_BUF: [u8; 1024] = [0; 1024];
     static mut PUTCHAR_BUF_IDX: usize = 0;
@@ -98,11 +98,17 @@ mod tests {
 
     macro_rules! assert_fizzbuzz {
         ($input:expr, $want:expr) => {
-            unsafe { PUTCHAR_BUF = [0;1024]; PUTCHAR_BUF_IDX = 0; } // reset fake buffer.
+            unsafe {
+                // reset fake buffer.
+                PUTCHAR_BUF = [0; 1024];
+                PUTCHAR_BUF_IDX = 0;
+            }
             fizzbuzz($input); // function under test, writing to fake buffer.
-            let printed_str = unsafe { str::from_utf8(&PUTCHAR_BUF[..PUTCHAR_BUF_IDX]).expect("PUTCHAR_BUF invalid utf8") };
+            let printed_str = unsafe {
+                str::from_utf8(&PUTCHAR_BUF[..PUTCHAR_BUF_IDX]).expect("PUTCHAR_BUF invalid utf8")
+            };
             assert_eq!(printed_str, $want);
-        }
+        };
     }
     #[test]
     fn fizzbuzz_printing() {
@@ -149,12 +155,12 @@ mod tests {
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
     puts(b"PANIC!");
-    loop{};
+    loop {}
 }
 
 const FIZZBUZZ: &[u8; 8] = b"fizzbuzz";
 
-fn fizzbuzz(n: i32){
+fn fizzbuzz(n: i32) {
     let mut buf: [u8; 11] = [0; 11];
     if n % 15 == 0 {
         puts(FIZZBUZZ);
@@ -170,7 +176,7 @@ fn fizzbuzz(n: i32){
 
 #[cfg(not(test))]
 #[no_mangle]
-pub fn main(){
+pub fn main() {
     for n in 0..100 {
         fizzbuzz(n);
     }
