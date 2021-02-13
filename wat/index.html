@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+  <head>
+    <title>WAT Example</title>
+    <link rel="stylesheet" href="https://unpkg.com/xterm@4.9.0/css/xterm.css" />
+  </head>
+  <body>
+    <script src="https://unpkg.com/xterm@4.9.0/lib/xterm.js"></script>
+    <div id="terminal"></div>
+    <script>
+      var term = new Terminal();
+      term.open(document.getElementById('terminal'));
+      term.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m\r\n');
+      const putchar = function(chr) {
+        if (chr == 0) {
+          console.log('warning: NULL')
+        }
+        var c = String.fromCharCode(chr);
+        if (c == '\n') {
+          c = '\r\n';
+        }
+        term.write(c);
+      }
+      var importObject = { host: { putchar: putchar } };
+
+      WebAssembly.instantiateStreaming(fetch('fizzbuzz.wasm'), importObject);
+    </script>
+  </body>
+</html>
