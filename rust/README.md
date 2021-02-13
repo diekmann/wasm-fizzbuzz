@@ -28,13 +28,14 @@ Also emscripten is out; this thread explores wasm from scratch, I don't want ano
 
 ---
 
-wasi seems to follow the http://wasi.dev spec and requires certain functions from the host environment. It doesn't run in `wasm-interp`, since those functions are not provided.
+wasi seems to follow the <http://wasi.dev> spec and requires certain functions from the host environment. It doesn't run in `wasm-interp`, since those functions are not provided.
 Since I want to develop my own API, wasi is out. Though, it does look cool.
 
 ![wasm2wat](../imgs/wasm_fizzbuzz_rust5.png)
 
 
-OTOH, the pure wasm does not require any functions from the host environment and just runs in `wasm-interp` (see prev screenshot, well, "run" is a bit of an euphemism, since the rust-generated main function is not executed by `wasm-interp`, but at least, it can be loaded). Downside: Since it's not importing anything, it cannot interact with the host, i.e. it cannot print anything, nor signal success or failure.
+OTOH, the pure wasm does not require any functions from the host environment and just runs in `wasm-interp` (see prev screenshot, well, "run" is a bit of an euphemism, since the rust-generated main function is not executed by `wasm-interp`, but at least, it can be loaded).
+Downside: Since it's not importing anything, it cannot interact with the host, i.e. it cannot print anything, nor signal success or failure.
 
 For this "from scratch thread", looks like wasm32-unknown-unknown is the target of choice. :smiley:
 
@@ -62,7 +63,7 @@ Well, it prints a lot of TODOs, but it works.
 
 ---
 
-Thanks to https://rustwasm.github.io/book/reference/code-size.html, the wasm binary size is down to 567 bytes. (rust code unchanged)
+Thanks to <https://rustwasm.github.io/book/reference/code-size.html>, the wasm binary size is down to 567 bytes. (rust code unchanged)
 
 ![rust code, Makefile, Cargo.toml](../imgs/wasm_fizzbuzz_rust10.png)
 
@@ -106,13 +107,13 @@ xterm.js is now almost 1000 times larger than our wasm. Time to stop the micro-o
 
 ---
 
-Table-driven testing—as known from Golang—is awesome. https://github.com/golang/go/wiki/TableDrivenTests The best equivalent I found in rust is to emulate table-driven tests with a macro.
+Table-driven testing—as known from Golang—is awesome. <https://github.com/golang/go/wiki/TableDrivenTests> The best equivalent I found in rust is to emulate table-driven tests with a macro.
 
 ![code](../imgs/wasm_fizzbuzz_rust16.png)
 
 ---
 
-With unit tests in place, I feel confident enhancing my number printing function. I follow Golang's style of https://github.com/golang/go/wiki/CodeReviewComments#indent-error-flow: The happy path is on the left, all special cases are indented. Required some minor refactoring, so I can `continue` the loop in the special case.
+With unit tests in place, I feel confident enhancing my number printing function. I follow Golang's style of <https://github.com/golang/go/wiki/CodeReviewComments#indent-error-flow>: The happy path is on the left, all special cases are indented. Required some minor refactoring, so I can `continue` the loop in the special case.
 
 ![better int_to_ascii code](../imgs/wasm_fizzbuzz_rust17.png)
 ![fizzbuzz in the browser](../imgs/wasm_fizzbuzz_rust18.png)
