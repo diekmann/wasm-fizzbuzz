@@ -1,6 +1,6 @@
 # Writing WebAssembly By Hand
 
-This doc is based on https://developer.mozilla.org/en-US/docs/WebAssembly, in particular, https://developer.mozilla.org/en-US/docs/WebAssembly/Understanding_the_text_format.
+This doc is based on <https://developer.mozilla.org/en-US/docs/WebAssembly>, in particular, <https://developer.mozilla.org/en-US/docs/WebAssembly/Understanding_the_text_format>.
 
 
 
