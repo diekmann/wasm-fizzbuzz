@@ -1,8 +1,9 @@
 name: GH-Pages
 
 on:
-    push:
-        - main
+  push:
+    branches:
+      - main
 
 jobs:
   deploy:
