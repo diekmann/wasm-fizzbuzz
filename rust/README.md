@@ -148,5 +148,9 @@ All config options somebody set at some point in time for some reason are outdat
 
 ---
 
+Demo at <https://diekmann.github.io/wasm-fizzbuzz/rust>.
+
+---
+
 Looks like we developed a small and working FizzBuzz implementation from scratch.
 Thanks for following along :blush:

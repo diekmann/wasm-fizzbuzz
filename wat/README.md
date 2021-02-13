@@ -97,3 +97,4 @@ I hope nobody notices that I'm a backend person. I have no frontend skills.
 
 :impostor:
 
+Demo at <https://diekmann.github.io/wasm-fizzbuzz/wat/>.
