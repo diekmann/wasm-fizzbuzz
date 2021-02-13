@@ -19,6 +19,5 @@ Non-goal: We will *not* implement our own WebAssembly interpreter or runtime, bu
 
 ---
 
-TODO: learn GitHub actions to deploy live demos to of Part 2 and Part 3 on GitHub pages.
-Demo at [diekmann.github.io/wasm-fizzbuzz/](https://diekmann.github.io/wasm-fizzbuzz/) (TODO(me): keep GitHub pages up to date)
+Demo at <https://diekmann.github.io/wasm-fizzbuzz/rust/>, deployed from (Part 3) via GitHub Actions to GitHub Pages.
 
