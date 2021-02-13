@@ -14,8 +14,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install toolchain
+      - name: Install wasm binary toolchain
         run: sudo apt update && sudo apt install wabt binaryen
+
+      - name: Setup Rust
+        run: rustup target add wasm32-unknown-unknown
 
       - name: Compile
         run: make gh-pages
