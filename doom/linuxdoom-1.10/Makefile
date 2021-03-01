@@ -96,6 +96,11 @@ $(O)/%.o:	%.c
 	mkdir -p linux
 	$(CC) $(CFLAGS) -c $< -o $@
 
+run:	all
+	Xephyr :1 -ac -screen 320x200x8 &
+	sleep 5 # ugly!! waiting for Xephyr to start.
+	DISPLAY=:1 ./linux/linuxxdoom
+
 #############################################################
 #
 #############################################################
