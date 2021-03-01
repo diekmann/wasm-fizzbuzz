@@ -6,7 +6,7 @@
 #
 CC=  gcc  # gcc or g++
 
-CFLAGS=-g -Wall -DNORMALUNIX -DLINUX # -DUSEASM 
+CFLAGS=-g -Wall -Wno-unused-const-variable -DNORMALUNIX -DLINUX # -DUSEASM
 LDFLAGS=-L/usr/X11R6/lib
 LIBS=-lXext -lX11 -lnsl -lm
 
@@ -88,6 +88,7 @@ $(O)/linuxxdoom:	$(OBJS) $(O)/i_main.o
 	-o $(O)/linuxxdoom $(LIBS)
 
 $(O)/%.o:	%.c
+	mkdir -p linux
 	$(CC) $(CFLAGS) -c $< -o $@
 
 #############################################################
