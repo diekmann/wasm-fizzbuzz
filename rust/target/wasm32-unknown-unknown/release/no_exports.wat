@@ -139,7 +139,7 @@
                     br 1 (;@7;)
                   end
                 end
-                call $_ZN4core9panicking18panic_bounds_check17heedacfd10d9ec31dE
+                call $_ZN4core9panicking18panic_bounds_check17h81a63bf79280172dE
                 unreachable
               end
               local.get 2
@@ -147,7 +147,7 @@
               i32.lt_u
               br_if 1 (;@4;)
               local.get 2
-              call $_ZN4core5slice5index24slice_end_index_len_fail17h6f6253f4aa8173a8E
+              call $_ZN4core5slice5index24slice_end_index_len_fail17h137fe51578ce6a78E
               unreachable
             end
             local.get 0
@@ -177,13 +177,13 @@
     i32.const 16
     i32.add
     global.set 0)
-  (func $_ZN4core9panicking18panic_bounds_check17heedacfd10d9ec31dE (type 2)
-    call $_ZN4core9panicking9panic_fmt17h285dc015a87be5a4E
+  (func $_ZN4core9panicking18panic_bounds_check17h81a63bf79280172dE (type 2)
+    call $_ZN4core9panicking9panic_fmt17hbd8a975261a5f466E
     unreachable)
-  (func $_ZN4core5slice5index24slice_end_index_len_fail17h6f6253f4aa8173a8E (type 0) (param i32)
-    call $_ZN4core9panicking9panic_fmt17h285dc015a87be5a4E
+  (func $_ZN4core5slice5index24slice_end_index_len_fail17h137fe51578ce6a78E (type 0) (param i32)
+    call $_ZN4core9panicking9panic_fmt17hbd8a975261a5f466E
     unreachable)
-  (func $_ZN4core9panicking9panic_fmt17h285dc015a87be5a4E (type 2)
+  (func $_ZN4core9panicking9panic_fmt17hbd8a975261a5f466E (type 2)
     call $rust_begin_unwind
     unreachable)
   (table (;0;) 1 1 funcref)
