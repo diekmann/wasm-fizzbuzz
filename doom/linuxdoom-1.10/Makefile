@@ -86,20 +86,20 @@ all:	 $(O)/linuxxdoom
 
 clean:
 	rm -f *.o *~ *.flc
-	rm -f linux/*
+	rm -f $(O)/*
 
 $(O)/linuxxdoom:	$(OBJS) $(O)/i_main.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(O)/i_main.o \
 	-o $(O)/linuxxdoom $(LIBS)
 
 $(O)/%.o:	%.c
-	mkdir -p linux
+	mkdir -p $(O)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 run:	all
-	Xephyr :1 -ac -screen 320x200x8 &
+	Xephyr :1 -screen 320x200x8 -title DooM &
 	sleep 5 # ugly!! waiting for Xephyr to start.
-	DISPLAY=:1 ./linux/linuxxdoom
+	DISPLAY=:1 ./$(O)/linuxxdoom
 
 #############################################################
 #
