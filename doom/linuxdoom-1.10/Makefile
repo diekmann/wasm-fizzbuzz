@@ -97,9 +97,9 @@ $(O)/%.o:	%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 run:	all
-	Xephyr :1 -screen 320x200x8 -title DooM &
-	sleep 5 # ugly!! waiting for Xephyr to start.
-	DISPLAY=:1 ./$(O)/linuxxdoom
+	Xephyr :1 -screen 640x400x8 -title DooM &
+	sleep 1 # ugly!! waiting for Xephyr to start.
+	DISPLAY=:1 ./$(O)/linuxxdoom -2
 
 #############################################################
 #
