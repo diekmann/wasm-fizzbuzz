@@ -4,14 +4,14 @@
 #
 # $Log:$
 #
-CC=  gcc  # gcc or g++
+CC=  clang
 
 # doom was written with the implicit assumption that ints and pointers are 32bit.
 # Adding -m32 to make it compile on 64bit archs.
 # on Ubuntu 20.04:
 # apt install gcc-multilib libx11-dev:i386 libxext-dev:i386
 
-CFLAGS=-m32 -g -Wall -Wno-unused-const-variable -DNORMALUNIX -DLINUX # -DUSEASM
+CFLAGS=-m32 -O2 -Wall -flto -Wno-unused-const-variable -DNORMALUNIX -DLINUX
 LDFLAGS=-L/usr/X11R6/lib
 LIBS=-lXext -lX11 -lnsl -lm
 
