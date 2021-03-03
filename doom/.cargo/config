@@ -1,0 +1,10 @@
+[target.i686-unknown-linux-gnu]
+runner = "./run_in_256colors.sh"
+
+
+[build]
+# doom is a 32bit application.
+target = "i686-unknown-linux-gnu"
+
+[net]
+offline = true

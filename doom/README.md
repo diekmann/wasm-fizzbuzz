@@ -7,7 +7,7 @@ But we want to build everything from scratch in this series, without Emscripten.
 
 ---
 
-We start with the original vanilla DOOM sources from https://github.com/id-Software/DOOM at [6ed1e40](https://github.com/diekmann/wasm-fizzbuzz/commit/6ed1e4067082bfe61a7b767b91dc981aa1517f94).
+We start with the original vanilla DOOM sources from <https://github.com/id-Software/DOOM> at [6ed1e40](https://github.com/diekmann/wasm-fizzbuzz/commit/6ed1e4067082bfe61a7b767b91dc981aa1517f94).
 
 Some minor tweaks are necessary to compile the 1997 sources on my 64bit Ubuntu 20.04.
 
@@ -28,3 +28,40 @@ With those tweaks, DOOM is starting with X11 rendering:
 ![DOOM is compiling and starting with X11 rendering (no WebAssembly used so far)](imgs/doom_booting_x11.png)
 
 Time to port this to WebAssembly next.
+
+---
+
+Following <https://surma.dev/things/c-to-webassembly/>, we want to compile DOOM as `wasm32`.
+But this will be a long journey.
+And we cannot play doom once we switch to `wasm32` untill the graphics driver for X11 is removed and replaced by a graphics driver for the web.
+Therefore, to test as much as possible and be able to play doom during development, I will develop on X86 for as long as possible and change architecture to `wasm32` reather late.
+
+First, let's replace the compiler from `gcc` to `clang`, turn on optimization, and disable debugging.
+This reduces binary size from `1,9M` to `383K`
+
+To get doom ready for the web, we need to do the following
+
+* Replace the X11 graphics driver with something that works in the browser.
+* Replace the sound driver with, .... my PC does not have speakers, let's just remove sound.
+* Replace all calls DOOM makes into the C stand library (such as `malloc` or `fopen`) with implementations that work in the browser. Either by implementing them in WebAssembly or JavaScript.
+
+Since the year is 2021, there is no reason to write new C code, ...
+
+```
+~/git/wasm-fizzbuzz/doom$ cargo init
+```
+
+To make the doom C code callable interoperable with rust, we no longer compile it into a binry, but build a static library (`liblinuxxdoom.a`) instead.
+Inspired by <https://docs.rust-embedded.org/book/interoperability/c-with-rust.html>, we should be able to call DOOM's `D_DoomMain` from rust then.
+
+We are essentially still working on a 32bit application, remeber?
+
+```
+cargo run --target=i686-unknown-linux-gnu
+```
+
+Adding a `.cargo/config` to select the default target and a runner...
+
+And we got DOOM starting from rust \m/
+
+![DOOM starting via cargo](imgs/doom_booting_x11_rust.png)
