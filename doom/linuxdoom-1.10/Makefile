@@ -7,13 +7,20 @@
 CC=clang
 AR=llvm-ar-10
 
+# If your get `error: unable to execute command: Executable "wasm-ld" doesn't exist!` on Ubntu 20.04
+# apt install lld
+# ln -s /usr/bin/wasm-ld-10 /usr/bin/wasm-ld # ugly!
+WASM32_CFLAGS=--target=wasm32 -I/usr/include
+
 # doom was written with the implicit assumption that ints and pointers are 32bit.
 # Adding -m32 to make it compile on 64bit archs.
 # on Ubuntu 20.04:
 # apt install gcc-multilib libx11-dev:i386 libxext-dev:i386
-CFLAGS=-m32 -O2 -Wall -Wno-unused-const-variable -DNORMALUNIX -DLINUX
-LDFLAGS=-L/usr/X11R6/lib
-LIBS=-lX11
+DOOM_CFLAGS=-m32 -O2 -Wall -Wno-unused-const-variable -DNORMALUNIX -DLINUX 
+
+CFLAGS=$(DOOM_CFLAGS) $(WASM32_CFLAGS)
+LDFLAGS=-Wl,--no-entry -Wl,--export-all -nostdlib -Wl,--error-limit=0 #-L/usr/X11R6/lib
+LIBS=#-lX11
 
 # subdirectory for objects
 O=linux
