@@ -95,7 +95,7 @@ $(O)/linuxxdoom:	$(OBJS) $(O)/i_main.o
 
 $(O)/%.o:	%.c
 	mkdir -p $(O)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -nostdlib  -c $< -o $@
 
 run:	all
 	Xephyr :1 -screen 640x400x8 -title DooM &
