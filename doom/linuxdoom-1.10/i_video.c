@@ -27,18 +27,10 @@ rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/ipc.h>
-#include <sys/shm.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
-
-#include <X11/extensions/XShm.h>
-// Had to dig up XShm.c for this one.
-// It is in the libXext, but not in the XFree86 headers.
-#ifdef LINUX
-int XShmGetEventBase( Display* dpy ); // problems with g++?
-#endif
 
 #include <stdarg.h>
 #include <sys/time.h>
@@ -70,12 +62,6 @@ XVisualInfo	X_visualinfo;
 XImage*		image;
 int		X_width;
 int		X_height;
-
-// MIT SHared Memory extension.
-boolean		doShm;
-
-XShmSegmentInfo	X_shminfo;
-int		X_shmeventtype;
 
 // Fake mouse handling.
 // This cannot work properly w/o DGA.
@@ -163,14 +149,6 @@ int xlatekey(void)
 
 void I_ShutdownGraphics(void)
 {
-  // Detach from X server
-  if (!XShmDetach(X_display, &X_shminfo))
-	    I_Error("XShmDetach() failed in I_ShutdownGraphics()");
-
-  // Release shared memory.
-  shmdt(X_shminfo.shmaddr);
-  shmctl(X_shminfo.shmid, IPC_RMID, 0);
-
   // Paranoia.
   if (image){
   	image->data = NULL;
@@ -191,7 +169,6 @@ void I_StartFrame (void)
 static int	lastmousex = 0;
 static int	lastmousey = 0;
 boolean		mousemoved = false;
-boolean		shmFinished;
 
 void I_GetEvent(void)
 {
@@ -274,7 +251,6 @@ void I_GetEvent(void)
 	break;
 	
       default:
-	if (doShm && X_event.type == X_shmeventtype) shmFinished = true;
 	break;
     }
 
@@ -482,28 +458,6 @@ void I_FinishUpdate (void)
   	Expand4 ((unsigned *)(screens[0]), (double *) (image->data));
     }
 
-    if (doShm)
-    {
-
-	if (!XShmPutImage(	X_display,
-				X_mainWindow,
-				X_gc,
-				image,
-				0, 0,
-				0, 0,
-				X_width, X_height,
-				True ))
-	    I_Error("XShmPutImage() failed\n");
-
-	// wait for it to finish and processes all input events
-	shmFinished = false;
-	do
-	{
-	    I_GetEvent();
-	} while (!shmFinished);
-
-    }
-    else
     {
 
 	// draw the image
@@ -586,110 +540,6 @@ void I_SetPalette (byte* palette)
     UploadNewPalette(X_cmap, palette);
 }
 
-
-//
-// This function is probably redundant,
-//  if XShmDetach works properly.
-// ddt never detached the XShm memory,
-//  thus there might have been stale
-//  handles accumulating.
-//
-void grabsharedmemory(int size)
-{
-
-  int			key = ('d'<<24) | ('o'<<16) | ('o'<<8) | 'm';
-  struct shmid_ds	shminfo;
-  int			minsize = 320*200;
-  int			id;
-  int			rc;
-  // UNUSED int done=0;
-  int			pollution=5;
-  
-  // try to use what was here before
-  do
-  {
-    id = shmget((key_t) key, minsize, 0777); // just get the id
-    if (id != -1)
-    {
-      rc=shmctl(id, IPC_STAT, &shminfo); // get stats on it
-      if (!rc) 
-      {
-	if (shminfo.shm_nattch)
-	{
-	  fprintf(stderr, "User %d appears to be running "
-		  "DOOM.  Is that wise?\n", shminfo.shm_cpid);
-	  key++;
-	}
-	else
-	{
-	  if (getuid() == shminfo.shm_perm.cuid)
-	  {
-	    rc = shmctl(id, IPC_RMID, 0);
-	    if (!rc)
-	      fprintf(stderr,
-		      "Was able to kill my old shared memory\n");
-	    else
-	      I_Error("Was NOT able to kill my old shared memory");
-	    
-	    id = shmget((key_t)key, size, IPC_CREAT|0777);
-	    if (id==-1)
-	      I_Error("Could not get shared memory");
-	    
-	    rc=shmctl(id, IPC_STAT, &shminfo);
-	    
-	    break;
-	    
-	  }
-	  if (size >= shminfo.shm_segsz)
-	  {
-	    fprintf(stderr,
-		    "will use %d's stale shared memory\n",
-		    shminfo.shm_cpid);
-	    break;
-	  }
-	  else
-	  {
-	    fprintf(stderr,
-		    "warning: can't use stale "
-		    "shared memory belonging to id %d, "
-		    "key=0x%x\n",
-		    shminfo.shm_cpid, key);
-	    key++;
-	  }
-	}
-      }
-      else
-      {
-	I_Error("could not get stats on key=%d", key);
-      }
-    }
-    else
-    {
-      id = shmget((key_t)key, size, IPC_CREAT|0777);
-      if (id==-1)
-      {
-	extern int errno;
-	fprintf(stderr, "errno=%d\n", errno);
-	I_Error("Could not get any shared memory");
-      }
-      break;
-    }
-  } while (--pollution);
-  
-  if (!pollution)
-  {
-    I_Error("Sorry, system too polluted with stale "
-	    "shared memory segments.\n");
-    }	
-  
-  X_shminfo.shmid = id;
-  
-  // attach to the shared memory segment
-  image->data = X_shminfo.shmaddr = shmat(id, 0, 0);
-  
-  fprintf(stderr, "shared memory id=%d, addr=0x%x\n", id,
-	  (int) (image->data));
-}
 
 void I_InitGraphics(void)
 {
@@ -774,23 +624,6 @@ void I_InitGraphics(void)
 	I_Error("xdoom currently only supports 256-color PseudoColor screens");
     X_visual = X_visualinfo.visual;
 
-    // check for the MITSHM extension
-    doShm = XShmQueryExtension(X_display);
-
-    // even if it's available, make sure it's a local connection
-    if (doShm)
-    {
-	if (!displayname) displayname = (char *) getenv("DISPLAY");
-	if (displayname)
-	{
-	    d = displayname;
-	    while (*d && (*d != ':')) d++;
-	    if (*d) *d = 0;
-	    if (!(!strcasecmp(displayname, "unix") || !*displayname)) doShm = false;
-	}
-    }
-
-    fprintf(stderr, "Using MITSHM extension\n");
 
     // create the colormap
     X_cmap = XCreateColormap(X_display, RootWindow(X_display,
@@ -853,50 +686,6 @@ void I_InitGraphics(void)
 		     GrabModeAsync, GrabModeAsync,
 		     X_mainWindow, None, CurrentTime);
 
-    if (doShm)
-    {
-
-	X_shmeventtype = XShmGetEventBase(X_display) + ShmCompletion;
-
-	// create the image
-	image = XShmCreateImage(	X_display,
-					X_visual,
-					8,
-					ZPixmap,
-					0,
-					&X_shminfo,
-					X_width,
-					X_height );
-
-	grabsharedmemory(image->bytes_per_line * image->height);
-
-
-	// UNUSED
-	// create the shared memory segment
-	// X_shminfo.shmid = shmget (IPC_PRIVATE,
-	// image->bytes_per_line * image->height, IPC_CREAT | 0777);
-	// if (X_shminfo.shmid < 0)
-	// {
-	// perror("");
-	// I_Error("shmget() failed in InitGraphics()");
-	// }
-	// fprintf(stderr, "shared memory id=%d\n", X_shminfo.shmid);
-	// attach to the shared memory segment
-	// image->data = X_shminfo.shmaddr = shmat(X_shminfo.shmid, 0, 0);
-	
-
-	if (!image->data)
-	{
-	    perror("");
-	    I_Error("shmat() failed in InitGraphics()");
-	}
-
-	// get the X server to attach to it
-	if (!XShmAttach(X_display, &X_shminfo))
-	    I_Error("XShmAttach() failed in InitGraphics()");
-
-    }
-    else
     {
 	image = XCreateImage(	X_display,
     				X_visual,

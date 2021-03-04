@@ -5,7 +5,6 @@ fn main() {
 
 
     // libraries which should be removed before going to wasm
-    println!("cargo:rustc-link-lib=Xext");
     println!("cargo:rustc-link-lib=X11");
     println!("cargo:rustc-link-lib=nsl");
 }
