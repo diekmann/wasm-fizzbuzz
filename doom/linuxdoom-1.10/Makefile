@@ -13,7 +13,7 @@ AR=llvm-ar-10
 # apt install gcc-multilib libx11-dev:i386 libxext-dev:i386
 CFLAGS=-m32 -O2 -Wall -Wno-unused-const-variable -DNORMALUNIX -DLINUX
 LDFLAGS=-L/usr/X11R6/lib
-LIBS=-lX11 -lnsl
+LIBS=-lX11
 
 # subdirectory for objects
 O=linux
