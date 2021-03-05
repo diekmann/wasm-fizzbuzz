@@ -10,8 +10,7 @@ AR=llvm-ar-10
 # If your get `error: unable to execute command: Executable "wasm-ld" doesn't exist!` on Ubntu 20.04
 # apt install lld
 # ln -s /usr/bin/wasm-ld-10 /usr/bin/wasm-ld # ugly!
-# TODO: probably should use musl includes!!! -I../musl-1.2.2/include/ -I../musl-1.2.2/arch/wasm32/
-WASM32_CFLAGS=--target=wasm32 -I/usr/include
+WASM32_CFLAGS=--target=wasm32 -I../musl-1.2.2/include/ -I../musl-1.2.2/arch/wasm32/ -I../musl-1.2.2/arch/generic/ #-I/usr/include
 
 # doom was written with the implicit assumption that ints and pointers are 32bit.
 # Adding -m32 to make it compile on 64bit archs.
@@ -27,13 +26,13 @@ LIBS=#-lX11
 O=linux
 
 # not too sophisticated dependency
+# TODO: $(O)/i_video.o removed, because I don't want to depend on X11 headers. Cleanup needed!
 OBJS=				\
 		$(O)/doomdef.o		\
 		$(O)/doomstat.o		\
 		$(O)/dstrings.o		\
 		$(O)/i_system.o		\
 		$(O)/i_sound.o		\
-		$(O)/i_video.o		\
 		$(O)/i_net.o			\
 		$(O)/tables.o			\
 		$(O)/f_finale.o		\
