@@ -877,8 +877,7 @@ void D_DoomMain (void)
     if (M_CheckParm("-cdrom"))
     {
 	printf(D_CDROM);
-	mkdir("c:\\doomdata",0);
-	strcpy (basedefault,"c:/doomdata/default.cfg");
+	I_Error("CDROM support removed.");
     }	
     
     // turbo option
@@ -1057,7 +1056,7 @@ void D_DoomMain (void)
 	    "                      press enter to continue\n"
 	    "===========================================================================\n"
 	    );
-	getchar ();
+	I_Error("The original game would call getchar () now, but I decided to remove this call so I don't have to emulate STDIN processing when moving to the web.");
     }
 	
 
