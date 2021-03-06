@@ -1,7 +1,7 @@
 CC=clang
 AR=llvm-ar-10
 
-CFLAGS=--target=wasm32 -m32 -O2 -Wall -nostdlib -ffreestanding -nostdinc -I../musl-1.2.2/include/ -I../musl-1.2.2/arch/wasm32/ -I../musl-1.2.2/arch/generic/
+CFLAGS=--target=wasm32 -m32 -O2 -Wall -nostdlib -ffreestanding -nostdinc -I../musl-1.2.2/built_inc/include/
 
 SOURCES = extenddftf2.c extendsftf2.c
 OBJS = $(addprefix build/,$(SOURCES:.c=.o)) 

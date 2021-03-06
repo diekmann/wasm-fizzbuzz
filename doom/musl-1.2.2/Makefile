@@ -224,6 +224,7 @@ endif
 
 clean:
 	rm -rf obj lib
+	rm -rf built_inc
 
 distclean: clean
 	rm -f config.mak
