@@ -1,4 +1,5 @@
 use std::ffi::CString;
+use std::ffi::CStr;
 use std::os::raw::{c_char, c_int, c_long, c_double};
 
 #[allow(non_camel_case_types)]
@@ -24,6 +25,20 @@ extern "C" {
 }
 
 
+
+macro_rules! log {
+    ($($arg:tt)*) => {
+        let __the_log_str = format!( $( $arg )* );
+        unsafe { console_log(__the_log_str.as_ptr(), __the_log_str.len()) }
+    }
+}
+
+
+macro_rules! println { ($($arg:tt),*) => { log!( $( $arg )* ) }; }
+macro_rules! print { ($($arg:tt),*) => { log!( $( $arg )* ) }; }
+
+
+
 #[no_mangle]
 extern "C" fn wctomb(_: *const c_char, _: c_wchar) -> c_int {
     panic!("wctomb unimplemented");
@@ -37,6 +52,21 @@ extern "C" fn frexpl(_: i32, _: i64, _: i64, _: i32) { // type??
 #[no_mangle]
 extern "C" fn fabsl(_: i32, _: i64, _: i64) { // type??
     panic!("fabsl unimplemented");
+}
+
+#[no_mangle]
+extern "C" fn getenv(name: *const c_char) -> Option<Box<c_char>> {
+    let name = unsafe { CStr::from_ptr(name) };
+    let name = name.to_str().expect("invalid UTF8 getenv call");
+    let result = match name {
+        "DOOMWADDIR" => None,
+        "HOME" => None,
+        _ => {
+            log!("unexepcted getenv({:?}) call", name);
+            None
+        }
+    };
+    result
 }
 
 
@@ -173,11 +203,6 @@ extern "C" fn I_StartTic() {
 }
 
 #[no_mangle]
-extern "C" fn getenv(_: i32) -> i32 {
-    panic!("getenv unimplemented");
-}
-
-#[no_mangle]
 extern "C" fn access(_: i32, _: i32) -> i32 {
     panic!("access unimplemented");
 }
@@ -274,15 +299,8 @@ extern "C" fn lseek(_: i32, _: i64, _: i32) -> i64 {
 
 // end generated
 
-macro_rules! log {
-    ($($arg:tt)*) => {
-        let __the_log_str = format!( $( $arg )* );
-        unsafe { console_log(__the_log_str.as_ptr(), __the_log_str.len()) }
-    }
-}
-
 fn main() {
-    log!("Hello, {}! Answer={} ({:b} in binary)", "World, oem JS Console", 42, 42);
+    log!("Hello, {}! Answer={} ({:b} in binary)", "World, from JS Console", 42, 42);
 
     std::panic::set_hook(Box::new(|panic_info| {
         log!("PANIC!!");

@@ -795,6 +795,8 @@ void FindResponseFile (void)
 //
 void D_DoomMain (void)
 {
+	printf("Starting D_DoomMain\n");
+
     int             p;
     char                    file[256];
 
