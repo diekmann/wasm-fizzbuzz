@@ -1,0 +1,38 @@
+<!doctype html>
+
+<!-- copied from https://raw.githubusercontent.com/mdn/webassembly-examples/master/understanding-text-format/logger2.html (CC0) -->
+
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <title>DooM</title>
+  </head>
+
+  <body>
+    <script>
+      var memory = new WebAssembly.Memory({ initial : 22 });
+
+      function consoleLogString(offset, length) {
+        var bytes = new Uint8Array(memory.buffer, offset, length);
+        var string = new TextDecoder('utf8').decode(bytes);
+        console.log(string);
+      }
+
+      var importObject = {
+        js: {
+          console_log: consoleLogString
+        },
+        env: {
+          memory: memory
+        }
+      };
+
+      WebAssembly.instantiateStreaming(fetch('target/wasm32-unknown-unknown/debug/doom.wasm'), importObject)
+      .then(obj => {
+        obj.instance.exports.main();
+      });
+    </script>
+  </body>
+
+</html>

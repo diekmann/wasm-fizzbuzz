@@ -6,6 +6,9 @@ runner = "./run_in_256colors.sh"
 [target.wasm32-unknown-unknown]
 # not a real runner, rather "disassemble" for now
 runner = "./dump_wasm_imports.sh"
+rustflags = [
+  "-C", "link-args=--import-memory",
+]
 
 [build]
 target = "wasm32-unknown-unknown"

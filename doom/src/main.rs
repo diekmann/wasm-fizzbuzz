@@ -7,6 +7,7 @@ pub type c_wchar = ::std::os::raw::c_long;
 #[allow(non_camel_case_types)]
 pub type c_long_double = ::std::os::raw::c_double; //?
 
+// C libraries
 extern "C" {
     // d_main.c
     fn D_DoomMain() -> !;
@@ -14,6 +15,12 @@ extern "C" {
     // m_argv.c
     static mut myargc: c_int;
     static mut myargv: *const *const c_char;
+}
+
+// JavaScript
+#[link(wasm_import_module = "js")]
+extern "C" {
+    fn console_log(ptr: *const u8, len: usize);
 }
 
 
@@ -270,6 +277,9 @@ extern "C" fn lseek(_: i32, _: i64, _: i32) -> i64 {
 
 
 fn main() {
+    let hello = "Hello!";
+    unsafe { console_log(hello.as_ptr(), hello.len()) };
+
     println!("Hello, world from rust!");
 
     // TODO: set global variables
