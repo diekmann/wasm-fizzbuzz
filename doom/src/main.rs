@@ -1,5 +1,7 @@
 use std::ffi::CString;
-use std::os::raw::{c_char, c_int};
+use std::os::raw::{c_char, c_int, c_long};
+
+pub type c_wchar_t = ::std::os::raw::c_long;
 
 extern "C" {
     // d_main.c
@@ -8,6 +10,12 @@ extern "C" {
     // m_argv.c
     static mut myargc: c_int;
     static mut myargv: *const *const c_char;
+}
+
+
+#[no_mangle]
+pub extern "C" fn wctomb(_: *const c_char, _: c_wchar_t) -> c_int {
+    panic!("wctomb unimplemented");
 }
 
 fn main() {
