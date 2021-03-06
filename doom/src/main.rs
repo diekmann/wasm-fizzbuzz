@@ -70,6 +70,15 @@ extern "C" fn getenv(name: *const c_char) -> Option<Box<c_char>> {
 }
 
 
+
+#[no_mangle]
+extern "C" fn fputs(s: i32, stream: i32) -> i32 {
+    log!("fputs(s: {}, stream: {}) unimplemented", s, stream);
+    // TODO panic formatting broken!!!!
+    panic!("fputs unimplemented");
+}
+
+
 // generated
 
 #[no_mangle]
@@ -85,11 +94,6 @@ extern "C" fn ___errno_location() -> i32 {
 #[no_mangle]
 extern "C" fn __lockfile(_: i32) -> i32 {
     panic!("__lockfile unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn __towrite(_: i32) -> i32 {
-    panic!("__towrite unimplemented");
 }
 
 #[no_mangle]
@@ -215,11 +219,6 @@ extern "C" fn __toread(_: i32) -> i32 {
 #[no_mangle]
 extern "C" fn free(_: i32) {
     panic!("free unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn fputs(_: i32, _: i32) -> i32 {
-    panic!("fputs unimplemented");
 }
 
 #[no_mangle]
