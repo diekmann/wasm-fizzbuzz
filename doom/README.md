@@ -90,3 +90,18 @@ Crossover of musl 1.2.2 and arch from emscripten fro musl 1.1.15, but yolo!
 Only need the string formatting functions anyway. Kicking out everything else.
 
 Only making `make lib/libc.a`.
+
+---
+
+compiler rt for builtins.
+
+https://compiler-rt.llvm.org/
+"For example, when compiling for a 32-bit target, converting a double to a 64-bit unsigned integer is compiling into a runtime call to the "__fixunsdfdi" function. "
+
+https://00f.net/2019/04/07/compiling-to-webassembly-with-llvm-and-clang/ provides a precompiled `libclang_rt.builtins-wasm32.a`, which brings down the missing imports to 51.
+The result looks very promising.
+But I want to build a minimal version myself.
+
+Get https://github.com/llvm/llvm-project/ `llvm-project/compiler-rt/lib/builtins` sources and compile myself.
+No neew for arch I hope, no assmebly to be emitted.
+But using git tag `llvmorg-11.1.0`.
