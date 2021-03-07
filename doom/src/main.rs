@@ -69,6 +69,17 @@ extern "C" fn getenv(name: *const c_char) -> Option<Box<c_char>> {
     result
 }
 
+#[no_mangle]
+extern "C" fn  __syscall3(n: i32, a1: i32, a2: i32, a3: i32) -> i32{
+    if (n==20 /*SYS_writev*/ && a1 == 1 /*STDOUT*/){
+        log!("SYS_writev to STDOUT");
+        return 42; // TODO!!! will loop forever
+    }else{
+        log!("other __syscall3");
+    }
+    return -1;
+}
+
 
 // generated
 
