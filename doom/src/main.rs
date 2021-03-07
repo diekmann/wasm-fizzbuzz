@@ -152,10 +152,10 @@ extern "C" fn __stdio_close() {
     panic!("__stdio_close unimplemented");
 }
 
-#[no_mangle]
-extern "C" fn __stdio_write() {
-    panic!("__stdio_write unimplemented");
-}
+//#[no_mangle]
+//extern "C" fn __stdio_write() {
+//    panic!("__stdio_write unimplemented");
+//}
 
 #[no_mangle]
 extern "C" fn __stdio_seek() {

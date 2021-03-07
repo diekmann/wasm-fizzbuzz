@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <title>prinf test</title>
+  </head>
+
+  <body>
+    <script>
+      var memory = new WebAssembly.Memory({ initial : 2 });
+
+      function consoleLogString(offset, length) {
+        var bytes = new Uint8Array(memory.buffer, offset, length);
+        var string = new TextDecoder('utf8').decode(bytes);
+        console.log(string);
+      }
+
+      var importObject = {
+        env: {
+          console_log: consoleLogString,
+          memory: memory
+        }
+      };
+
+      WebAssembly.instantiateStreaming(fetch('main.wasm'), importObject)
+      .then(obj => {
+        obj.instance.exports.main();
+      });
+    </script>
+  </body>
+
+</html>
