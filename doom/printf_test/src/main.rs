@@ -75,6 +75,7 @@ extern "C" fn  __syscall3(n: i32, a1: i32, a2: i32, a3: i32) -> i32{
 }
 
 #[no_mangle]
-extern "C" fn __stdout_write() {
+//size_t __stdout_write(FILE *f, const unsigned char *buf, size_t len){
+extern "C" fn __stdout_write(_: i32, _: i32, _: i32) -> i32 {
     panic!("__stdout_write unimplemented");
 }
