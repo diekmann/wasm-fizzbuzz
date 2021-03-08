@@ -8,7 +8,7 @@
 
   <body>
     <script>
-      var memory = new WebAssembly.Memory({ initial : 2 });
+      var memory = new WebAssembly.Memory({ initial : 17 });
 
       function consoleLogString(offset, length) {
         var bytes = new Uint8Array(memory.buffer, offset, length);
@@ -23,7 +23,7 @@
         }
       };
 
-      WebAssembly.instantiateStreaming(fetch('main.wasm'), importObject)
+      WebAssembly.instantiateStreaming(fetch('target/wasm32-unknown-unknown/debug/printf_test.wasm'), importObject)
       .then(obj => {
         obj.instance.exports.main();
       });

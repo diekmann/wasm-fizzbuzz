@@ -8,8 +8,9 @@ void console_log(const unsigned char *buf, size_t len);
 
 #define STRLEN(s) (sizeof(s)/sizeof(const unsigned char) - 1)
 
-void main(){
-    puts("Hello, world");
+void c_main(){
+    puts("Hello, world from C!!!!!");
+    //printf("Hello, World from printf");
 }
 
 
