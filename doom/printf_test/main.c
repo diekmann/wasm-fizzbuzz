@@ -26,15 +26,6 @@ int __lockfile(FILE *f){
 }
 void __unlockfile(FILE *f){}
 
-// Ignore the file, just log to JavaScript
-//size_t __stdio_write(FILE *f, const unsigned char *buf, size_t len){
-//    console_log(buf, len);
-//    return len;
-//}
-size_t __stdout_write(FILE *f, const unsigned char *buf, size_t len){
-    return __stdio_write(f, buf, len);
-}
-
 int __stdio_close(FILE *f)
 {
 	return 0;
