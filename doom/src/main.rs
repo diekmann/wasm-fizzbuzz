@@ -1,6 +1,6 @@
 use std::ffi::CString;
-use std::ffi::{CStr, c_void};
-use std::os::raw::{c_char, c_int, c_long, c_double};
+use std::ffi::{c_void, CStr};
+use std::os::raw::{c_char, c_int};
 
 #[allow(non_camel_case_types)]
 pub type c_wchar = ::std::os::raw::c_long;
@@ -24,8 +24,6 @@ extern "C" {
     fn console_log(ptr: *const u8, len: usize);
 }
 
-
-
 macro_rules! log {
     ($($arg:tt)*) => {
         let __the_log_str = format!( $( $arg )* );
@@ -33,11 +31,7 @@ macro_rules! log {
     }
 }
 
-
 macro_rules! println { ($($arg:tt),*) => { log!( $( $arg )* ) }; }
-macro_rules! print { ($($arg:tt),*) => { log!( $( $arg )* ) }; }
-
-
 
 #[no_mangle]
 extern "C" fn wctomb(_: *const c_char, _: c_wchar) -> c_int {
@@ -45,22 +39,27 @@ extern "C" fn wctomb(_: *const c_char, _: c_wchar) -> c_int {
 }
 
 #[no_mangle]
-extern "C" fn frexpl(_: i32, _: i64, _: i64, _: i32) { // type??
+extern "C" fn frexpl(_: i32, _: i64, _: i64, _: i32) {
+    // type??
     panic!("frexpls unimplemented");
 }
 
 #[no_mangle]
-extern "C" fn fabsl(_: i32, _: i64, _: i64) { // type??
+extern "C" fn fabsl(_: i32, _: i64, _: i64) {
+    // type??
     panic!("fabsl unimplemented");
 }
 
+static HOME_ENV: &'static [u8; 11] = b"/home/doom\0"; // C string, terminate with \0!
+
 #[no_mangle]
-extern "C" fn getenv(name: *const c_char) -> Option<Box<c_char>> {
+extern "C" fn getenv(name: *const c_char) -> Option<&'static [u8; 11]> {
+    // TODO type!!!
     let name = unsafe { CStr::from_ptr(name) };
     let name = name.to_str().expect("invalid UTF8 getenv call");
     let result = match name {
         "DOOMWADDIR" => None,
-        "HOME" => None,
+        "HOME" => Some(HOME_ENV),
         _ => {
             log!("unexepcted getenv({:?}) call", name);
             None
@@ -69,38 +68,39 @@ extern "C" fn getenv(name: *const c_char) -> Option<Box<c_char>> {
     result
 }
 
-
 struct IOVec {
     iov_base: *const u8, // void*
-    iov_len: usize, // size_t
+    iov_len: usize,      // size_t
 }
 
-
 #[no_mangle]
-extern "C" fn  __syscall3(n: i32, a1: i32, a2: i32, a3: i32) -> i32{
-    if n==20 /*SYS_writev*/ && (a1 == 1 /*STDOUT*/ || a1 == 2 /*STDERR*/) {
-        log!("SYS_writev to STDOUT/STDERR");
+extern "C" fn __syscall3(n: i32, a1: i32, a2: i32, a3: i32) -> i32 {
+    const SYS_WRITEV: c_int = 20;
 
+    const STDOUT: c_int = 1;
+    const STDERR: c_int = 2;
+
+    if n == SYS_WRITEV && (a1 == STDOUT || a1 == STDERR) {
         let iov_ptr: *const IOVec = a2 as *const IOVec;
         let iovcnt = a3 as usize;
         let iovs = unsafe { std::slice::from_raw_parts(iov_ptr, iovcnt) };
         let mut bytes_written = 0;
         for iov in iovs {
+            if iov.iov_len == 0 {
+                continue;
+            }
             unsafe { console_log(iov.iov_base, iov.iov_len) };
             bytes_written += iov.iov_len as i32;
         }
         return bytes_written;
-    }else{
+    } else {
         log!("other __syscall3({}, {}, {}, {})", n, a1, a2, a3);
     }
     return -1;
 }
 
-
-
 #[no_mangle]
 extern "C" fn malloc(size: usize) -> *const c_void {
-    // pub fn into_raw(this: Rc<T>) -> *const T
     let mut mem: Vec<u8> = std::vec::Vec::with_capacity(size);
     unsafe { mem.set_len(size) };
     let static_ref: &'static mut [u8] = mem.leak(); //TODO make free()-able.
@@ -112,13 +112,44 @@ extern "C" fn free(_: i32) {
     panic!("free unimplemented");
 }
 
-
-static mut single_thread_errno: c_int = 0; // YOLO
+static mut SINGLE_THREAD_ERRNO: c_int = 0; // YOLO
 #[no_mangle]
 extern "C" fn ___errno_location() -> *const c_int {
-    unsafe { &single_thread_errno }
+    unsafe { &SINGLE_THREAD_ERRNO }
 }
 
+#[no_mangle]
+extern "C" fn access(pathname: *const c_char, mode: c_int) -> c_int {
+    const ENOENT: c_int = 2;
+
+    let pathname = unsafe { CStr::from_ptr(pathname).to_str().expect("invalid UTF8") };
+    match pathname {
+        "./doom2f.wad" => ENOENT,
+        "./doom2.wad" => ENOENT,
+        "./plutonia.wad" => ENOENT,
+        "./tnt.wad" => ENOENT,
+        "./doom.wad" => ENOENT,
+        "./doomu.wad" => ENOENT,
+        "./doom1.wad" => ENOENT, // TODO this file should exist.
+        _ => panic!("access({}, {}) unimplemented", pathname, mode),
+    }
+}
+
+#[no_mangle]
+extern "C" fn fopen(pathname: *const c_char, mode: c_int) -> i32 /* FILE* */ {
+    let pathname = unsafe { CStr::from_ptr(pathname).to_str().expect("invalid UTF8") };
+
+    if pathname == "/home/doom/.doomrc" {
+        return 0; // NULL for error
+    }
+
+    panic!("fopen({}, {}) unimplemented", pathname, mode);
+}
+
+#[no_mangle]
+extern "C" fn I_ShutdownGraphics() {
+    log!("Bye!! TODO: implement I_ShutdownGraphics");
+}
 
 // generated
 
@@ -126,7 +157,6 @@ extern "C" fn ___errno_location() -> *const c_int {
 extern "C" fn I_ReadScreen(_: i32) {
     panic!("I_ReadScreen unimplemented");
 }
-
 
 #[no_mangle]
 extern "C" fn __lockfile(_: i32) -> i32 {
@@ -174,11 +204,6 @@ extern "C" fn gettimeofday(_: i32, _: i32) -> i32 {
 }
 
 #[no_mangle]
-extern "C" fn I_ShutdownGraphics() {
-    panic!("I_ShutdownGraphics unimplemented");
-}
-
-#[no_mangle]
 extern "C" fn exit(_: i32) {
     panic!("exit unimplemented");
 }
@@ -209,11 +234,6 @@ extern "C" fn __unlock(_: i32) {
 }
 
 #[no_mangle]
-extern "C" fn fopen(_: i32, _: i32) -> i32 {
-    panic!("fopen unimplemented");
-}
-
-#[no_mangle]
 extern "C" fn I_InitGraphics() {
     panic!("I_InitGraphics unimplemented");
 }
@@ -226,11 +246,6 @@ extern "C" fn I_StartFrame() {
 #[no_mangle]
 extern "C" fn I_StartTic() {
     panic!("I_StartTic unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn access(_: i32, _: i32) -> i32 {
-    panic!("access unimplemented");
 }
 
 #[no_mangle]
@@ -310,9 +325,13 @@ extern "C" fn lseek(_: i32, _: i64, _: i32) -> i64 {
 
 // end generated
 
-
 fn main() {
-    log!("Hello, {}! Answer={} ({:b} in binary)", "World, from JS Console", 42, 42);
+    log!(
+        "Hello, {}! Answer={} ({:b} in binary)",
+        "World, from JS Console",
+        42,
+        42
+    );
 
     std::panic::set_hook(Box::new(|panic_info| {
         log!("PANIC!!");
@@ -324,7 +343,7 @@ fn main() {
             Some(l) => format!("in file '{}' at line {}", l.file(), l.line()),
             None => String::from("but can't get location information..."),
         };
-        log!("panic occurred: \"{}\" {}", p, l);
+        log!("panic occurred: \"{}\" {}\n{:?}", p, l, panic_info);
     }));
 
     println!("Hello, world from rust!");
