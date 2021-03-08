@@ -22,18 +22,18 @@ fn main() {
 
 
     // compiler runtime, with e.g., floating point funtcions
-    //println!("cargo:rerun-if-changed={}", LIBGCC_SRC);
-    //let status = Command::new("make").args(&["-C", LIBGCC_SRC, "build/libclang_rt.builtins-wasm32.a"]).status().expect("failed to start compiler_rt make");
-    //if !status.success(){
-    //    panic!("Failed to make: {}", status);
-    //}
-    //println!("cargo:rustc-link-search={}/build", LIBGCC_SRC);
-    //println!("cargo:rustc-link-lib=clang_rt.builtins-wasm32");
+    println!("cargo:rerun-if-changed={}", LIBGCC_SRC);
+    let status = Command::new("make").args(&["-C", LIBGCC_SRC, "build/libclang_rt.builtins-wasm32.a"]).status().expect("failed to start compiler_rt make");
+    if !status.success(){
+        panic!("Failed to make: {}", status);
+    }
+    println!("cargo:rustc-link-search={}/build", LIBGCC_SRC);
+    println!("cargo:rustc-link-lib=clang_rt.builtins-wasm32");
 
     // Temporarily use pre-compiled library from https://00f.net/2019/04/07/compiling-to-webassembly-with-llvm-and-clang/
     // TODO built myself!
-    println!("cargo:rustc-link-search=foo");
-    println!("cargo:rustc-link-lib=clang_rt.builtins-wasm32");
+    //println!("cargo:rustc-link-search=foo");
+    //println!("cargo:rustc-link-lib=clang_rt.builtins-wasm32");
 
 
     // original Doom Sources
