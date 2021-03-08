@@ -1,3 +1,5 @@
+// $ make libmain.a && cargo clean && cargo run
+
 use std::ffi::CStr;
 use std::os::raw::{c_char};
 
@@ -19,7 +21,6 @@ macro_rules! log {
 }
 
 macro_rules! println { ($($arg:tt),*) => { log!( $( $arg )* ) }; }
-macro_rules! print { ($($arg:tt),*) => { log!( $( $arg )* ) }; }
 
 #[no_mangle]
 extern "C" fn hello_from_rust(name: *const c_char) {
@@ -45,4 +46,30 @@ fn main() {
     println!("Hello, world from rust!");
     unsafe { c_main(); }
 
+}
+
+struct IOVec {
+    iov_base: *const u8, // void*
+    iov_len: usize, // size_t
+}
+
+
+#[no_mangle]
+extern "C" fn  __syscall3(n: i32, a1: i32, a2: i32, a3: i32) -> i32{
+    if n==20 /*SYS_writev*/ && a1 == 1 /*STDOUT*/ {
+        log!("SYS_writev to STDOUT");
+
+        let iov_ptr: *const IOVec = a2 as *const IOVec;
+        let iovcnt = a3 as usize;
+        let iovs = unsafe { std::slice::from_raw_parts(iov_ptr, iovcnt) };
+        let mut bytes_written = 0;
+        for iov in iovs {
+            unsafe { console_log(iov.iov_base, iov.iov_len) };
+            bytes_written += iov.iov_len as i32;
+        }
+        return bytes_written;
+    }else{
+        log!("other __syscall3");
+    }
+    return -1;
 }

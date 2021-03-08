@@ -15,6 +15,7 @@ void c_main(){
     puts("Hello, world from C!!!!!");
     hello_from_rust("FOOBAR");
     //printf("Hello, World from printf");
+    puts("Hello, world from C again!");
 }
 
 
@@ -51,23 +52,23 @@ void __stdio_exit_needed(void){}
 static int single_thread_errno; // YOLO
 int *___errno_location(){ return &single_thread_errno; }
 
-long __syscall3(long n, long a1, long a2, long a3){
-    if (n==SYS_writev && a1 == 1){
-        const unsigned char msg[] = "SYS_writev to STDOUT";
-        console_log(msg, STRLEN(msg));
+// long __syscall3(long n, long a1, long a2, long a3){
+//     if (n==SYS_writev && a1 == 1){
+//         const unsigned char msg[] = "SYS_writev to STDOUT";
+//         console_log(msg, STRLEN(msg));
 
-        const struct iovec *iov = a2;
-        int iovcnt = a3;
+//         const struct iovec *iov = a2;
+//         int iovcnt = a3;
 
-        int bytes_written = 0;
-        for(int i = 0; i < iovcnt; ++i){
-            console_log(iov[i].iov_base, iov[i].iov_len);
-            bytes_written += iov[i].iov_len;
-        }
-        return bytes_written;
-    }else{
-        const unsigned char msg[] = "other __syscall3";
-        console_log(msg, STRLEN(msg));
-    }
-    return 10;
-}
+//         int bytes_written = 0;
+//         for(int i = 0; i < iovcnt; ++i){
+//             console_log(iov[i].iov_base, iov[i].iov_len);
+//             bytes_written += iov[i].iov_len;
+//         }
+//         return bytes_written;
+//     }else{
+//         const unsigned char msg[] = "other __syscall3";
+//         console_log(msg, STRLEN(msg));
+//     }
+//     return 10;
+// }
