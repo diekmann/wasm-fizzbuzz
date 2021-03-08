@@ -8,7 +8,7 @@ SOURCES = main.c
 OBJS = $(addprefix build/,$(SOURCES:.c=.o)) 
 
 libmain.a: main.c
-	$(CC) $(CFLAGS) $(LIBS) -c $< -o main.o
+	$(CC) $(CFLAGS) -c $< -o main.o
 	$(AR) rcs $@ main.o
 
 main: main.c
