@@ -11,7 +11,7 @@
 
   <body>
     <script>
-      var memory = new WebAssembly.Memory({ initial : 22 });
+      var memory = new WebAssembly.Memory({ initial : 86 });
 
       function consoleLogString(offset, length) {
         var bytes = new Uint8Array(memory.buffer, offset, length);

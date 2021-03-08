@@ -130,7 +130,7 @@ extern "C" fn access(pathname: *const c_char, mode: c_int) -> c_int {
         "./tnt.wad" => ENOENT,
         "./doom.wad" => ENOENT,
         "./doomu.wad" => ENOENT,
-        "./doom1.wad" => ENOENT, // TODO this file should exist.
+        "./doom1.wad" => 0, /* OK */
         _ => panic!("access({}, {}) unimplemented", pathname, mode),
     }
 }
@@ -144,6 +144,55 @@ extern "C" fn fopen(pathname: *const c_char, mode: c_int) -> i32 /* FILE* */ {
     }
 
     panic!("fopen({}, {}) unimplemented", pathname, mode);
+}
+
+const DOOM1_WAD_FD: c_int = 42; // file descriptor for openend ./doom1.wad
+static DOOM1_WAD: &[u8; 4196020] = include_bytes!("../doom1.wad");
+static mut DOOM1_WAD_SEEKER: usize = 0;
+
+#[no_mangle]
+extern "C" fn open(pathname: *const c_char, flags: c_int, mode: i32) -> i32 {
+    let pathname = unsafe { CStr::from_ptr(pathname).to_str().expect("invalid UTF8") };
+
+    if pathname == "./doom1.wad" {
+        return DOOM1_WAD_FD;
+    }
+
+    panic!("open({}, {}, {}) unimplemented", pathname, flags, mode);
+}
+
+#[no_mangle]
+extern "C" fn read(fd: c_int, buf: *mut u8 /*TODO is c_char*/, count: usize) -> isize {
+    if fd == DOOM1_WAD_FD {
+        //TODO read DOOM1_WAD and advance seek
+        let buf = unsafe { std::slice::from_raw_parts_mut(buf, count) };
+        let s = unsafe { DOOM1_WAD_SEEKER };
+        buf[..count].copy_from_slice(&DOOM1_WAD[s..s + count]);
+        unsafe {
+            DOOM1_WAD_SEEKER += count;
+        }
+        return count as isize;
+    }
+    panic!("read({}, buf, {}) unimplemented", fd, count);
+}
+
+#[no_mangle]
+extern "C" fn lseek(fd: i32, offset: i64, whence: c_int) -> i64 {
+    const SEEK_SET: c_int = 0;
+    const SEEK_CUR: c_int = 1;
+    const SEEK_END: c_int = 2;
+    if fd == DOOM1_WAD_FD {
+        match whence {
+            SEEK_SET => {
+                unsafe { DOOM1_WAD_SEEKER = offset as usize };
+                return unsafe { DOOM1_WAD_SEEKER } as i64;
+            }
+            _ => {
+                log!("TODO lseek");
+            }
+        }
+    }
+    panic!("lseek({}, {}, {}) unimplemented", fd, offset, whence);
 }
 
 #[no_mangle]
@@ -254,16 +303,6 @@ extern "C" fn __toread(_: i32) -> i32 {
 }
 
 #[no_mangle]
-extern "C" fn open(_: i32, _: i32, _: i32) -> i32 {
-    panic!("open unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn read(_: i32, _: i32, _: i32) -> i32 {
-    panic!("read unimplemented");
-}
-
-#[no_mangle]
 extern "C" fn close(_: i32) -> i32 {
     panic!("close unimplemented");
 }
@@ -316,11 +355,6 @@ extern "C" fn scalbnl(_: i32, _: i64, _: i64, _: i32) {
 #[no_mangle]
 extern "C" fn fmodl(_: i32, _: i64, _: i64, _: i64, _: i64) {
     panic!("fmodl unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn lseek(_: i32, _: i64, _: i32) -> i64 {
-    panic!("lseek unimplemented");
 }
 
 // end generated
