@@ -19,9 +19,18 @@
         console.log(string);
       }
 
+      function  GetTimeOfDay(ptr) {
+        var timeval = new Uint32Array(memory.buffer, ptr, 2);
+        // TODO: maybe wait for animation frame?
+        let t = new Date();
+        timeval[0] = t.getSeconds();
+        timeval[1] = t.getMilliseconds() * 1000 // as usec YOLO;
+      }
+
       var importObject = {
         js: {
-          console_log: consoleLogString
+          console_log: consoleLogString,
+          js_timeofday: GetTimeOfDay,
         },
         env: {
           memory: memory

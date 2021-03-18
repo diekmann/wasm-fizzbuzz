@@ -1,5 +1,6 @@
 use std::os::raw::c_int;
 
+#[repr(C)]
 struct IOVec {
     iov_base: *const u8, // void*
     iov_len: usize,      // size_t

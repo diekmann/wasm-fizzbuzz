@@ -1,6 +1,6 @@
 use std::ffi::CString;
 use std::ffi::{CStr};
-use std::os::raw::{c_char, c_int};
+use std::os::raw::{c_char, c_int, c_long};
 
 #[allow(non_camel_case_types)]
 pub type c_wchar = ::std::os::raw::c_long;
@@ -145,31 +145,56 @@ extern "C" fn I_ShutdownGraphics() {
 }
 
 
+// struct timeval { time_t tv_sec; suseconds_t tv_usec; };
+#[repr(C)]
+struct Timeval {
+    tv_sec: c_long, // TODO is this i32 or i64??
+    tv_usec: c_long,
+}
+
+
+#[link(wasm_import_module = "js")]
+extern "C" {
+    fn js_timeofday(ptr: *mut Timeval);
+}
+
+#[no_mangle]
+extern "C" fn gettimeofday(tv: *mut Timeval, _tz: i32) -> c_int {
+    // timezone is obsolete and should not be needef for doom.
+    let tv = match unsafe { tv.as_mut() } {
+        None => return 0 /*do nothing*/ ,
+        Some(tv) => tv,
+    };
+
+    unsafe { js_timeofday(tv) };
+    log!("gettimeofday slightly unimplemented (TODO: required for Doom's ticks)");
+    0 // success
+}
 
 
 #[no_mangle]
 extern "C" fn I_InitGraphics() {
-    panic!("I_InitGraphics unimplemented");
+    log!("I_InitGraphics (TODO)");
 }
 
 #[no_mangle]
 extern "C" fn I_StartFrame() {
-    panic!("I_StartFrame unimplemented");
+    log!("I_StartFrame (TODO)");
 }
 
 #[no_mangle]
 extern "C" fn I_StartTic() {
-    panic!("I_StartTic unimplemented");
+    log!("I_StartTic unimplemented!!!!!!!!!!!!!!!!!!");
 }
 
 #[no_mangle]
 extern "C" fn I_UpdateNoBlit() {
-    panic!("I_UpdateNoBlit unimplemented");
+    log!("I_UpdateNoBlit unimplemented!!");
 }
 
 #[no_mangle]
 extern "C" fn I_SetPalette(_: i32) {
-    panic!("I_SetPalette unimplemented");
+    log!("I_SetPalette unimplemented");
 }
 
 #[no_mangle]
