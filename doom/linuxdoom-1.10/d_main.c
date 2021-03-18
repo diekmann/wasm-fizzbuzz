@@ -797,6 +797,7 @@ void D_DoomMain (void)
 {
 	puts("Starting D_DoomMain");
 	printf("Triggering a printf\n");
+	printf("Doom's screen is %dx%d\n", SCREENWIDTH, SCREENHEIGHT);
 
     int             p;
     char                    file[256];

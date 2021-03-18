@@ -179,17 +179,23 @@ extern "C" fn I_InitGraphics() {
 
 #[no_mangle]
 extern "C" fn I_StartFrame() {
-    log!("I_StartFrame (TODO)");
+    // From the original Doom Sources:
+    // https://github.com/id-Software/DOOM/blob/master/linuxdoom-1.10/i_video.c#L185
+    // // er?
 }
 
 #[no_mangle]
 extern "C" fn I_StartTic() {
     log!("I_StartTic unimplemented!!!!!!!!!!!!!!!!!!");
+    // should get inputs (e.g. key presses/releases)
+    // and send them to D_PostEvent().
 }
 
 #[no_mangle]
 extern "C" fn I_UpdateNoBlit() {
-    log!("I_UpdateNoBlit unimplemented!!");
+    // From the original Doom sources:
+    // https://github.com/id-Software/DOOM/blob/master/linuxdoom-1.10/i_video.c#L346
+    // // what is this?
 }
 
 #[no_mangle]
@@ -200,6 +206,15 @@ extern "C" fn I_SetPalette(_: i32) {
 #[no_mangle]
 extern "C" fn I_FinishUpdate() {
     panic!("I_FinishUpdate unimplemented");
+    // Draws the screen
+    // Doom's C sources define
+    //
+    // // Screen 0 is the screen updated by I_Update screen.
+    // // Screen 1 is an extra buffer.
+    // extern	byte*		screens[5];
+    //
+    // I think only screens[0] is needed.
+    // The screens are SCREENWIDTH*SCREENHEIGHT, which is 320x200
 }
 
 #[no_mangle]
