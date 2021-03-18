@@ -18,20 +18,8 @@ extern "C" {
     static mut myargv: *const *const c_char;
 }
 
-// JavaScript
-#[link(wasm_import_module = "js")]
-extern "C" {
-    fn console_log(ptr: *const u8, len: usize);
-}
-
-macro_rules! log {
-    ($($arg:tt)*) => {
-        let __the_log_str = format!( $( $arg )* );
-        unsafe { console_log(__the_log_str.as_ptr(), __the_log_str.len()) }
-    }
-}
-
-macro_rules! println { ($($arg:tt),*) => { log!( $( $arg )* ) }; }
+// Macros to print to JavaScript Console.
+use doom::{log, println};
 
 #[no_mangle]
 extern "C" fn wctomb(_: *const c_char, _: c_wchar) -> c_int {
@@ -66,37 +54,6 @@ extern "C" fn getenv(name: *const c_char) -> *const c_char { //TODO returning an
         }
     };
     result
-}
-
-struct IOVec {
-    iov_base: *const u8, // void*
-    iov_len: usize,      // size_t
-}
-
-#[no_mangle]
-extern "C" fn __syscall3(n: i32, a1: i32, a2: i32, a3: i32) -> i32 {
-    const SYS_WRITEV: c_int = 20;
-
-    const STDOUT: c_int = 1;
-    const STDERR: c_int = 2;
-
-    if n == SYS_WRITEV && (a1 == STDOUT || a1 == STDERR) {
-        let iov_ptr: *const IOVec = a2 as *const IOVec;
-        let iovcnt = a3 as usize;
-        let iovs = unsafe { std::slice::from_raw_parts(iov_ptr, iovcnt) };
-        let mut bytes_written = 0;
-        for iov in iovs {
-            if iov.iov_len == 0 {
-                continue;
-            }
-            unsafe { console_log(iov.iov_base, iov.iov_len) };
-            bytes_written += iov.iov_len as i32;
-        }
-        return bytes_written;
-    } else {
-        log!("other __syscall3({}, {}, {}, {})", n, a1, a2, a3);
-    }
-    return -1;
 }
 
 #[no_mangle]
@@ -200,36 +157,22 @@ extern "C" fn I_ShutdownGraphics() {
     log!("Bye!! TODO: implement I_ShutdownGraphics");
 }
 
-// generated
+
+
 
 #[no_mangle]
-extern "C" fn I_ReadScreen(_: i32) {
-    panic!("I_ReadScreen unimplemented");
+extern "C" fn I_InitGraphics() {
+    panic!("I_InitGraphics unimplemented");
 }
 
 #[no_mangle]
-extern "C" fn __lockfile(_: i32) -> i32 {
-    panic!("__lockfile unimplemented");
+extern "C" fn I_StartFrame() {
+    panic!("I_StartFrame unimplemented");
 }
 
 #[no_mangle]
-extern "C" fn __unlockfile(_: i32) {
-    panic!("__unlockfile unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn __signbitl(_: i64, _: i64) -> i32 {
-    panic!("__signbitl unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn __fpclassifyl(_: i64, _: i64) -> i32 {
-    panic!("__fpclassifyl unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn strerror(_: i32) -> i32 {
-    panic!("strerror unimplemented");
+extern "C" fn I_StartTic() {
+    panic!("I_StartTic unimplemented");
 }
 
 #[no_mangle]
@@ -248,116 +191,12 @@ extern "C" fn I_FinishUpdate() {
 }
 
 #[no_mangle]
-extern "C" fn gettimeofday(_: i32, _: i32) -> i32 {
-    panic!("gettimeofday unimplemented");
+extern "C" fn I_ReadScreen(_: i32) {
+    panic!("I_ReadScreen unimplemented");
 }
 
-#[no_mangle]
-extern "C" fn exit(_: i32) {
-    panic!("exit unimplemented");
-}
 
-#[no_mangle]
-extern "C" fn usleep(_: i32) -> i32 {
-    panic!("usleep unimplemented");
-}
 
-#[no_mangle]
-extern "C" fn __stdio_close() {
-    panic!("__stdio_close unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn __stdio_seek() {
-    panic!("__stdio_seek unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn __lock(_: i32) {
-    panic!("__lock unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn __unlock(_: i32) {
-    panic!("__unlock unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn I_InitGraphics() {
-    panic!("I_InitGraphics unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn I_StartFrame() {
-    panic!("I_StartFrame unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn I_StartTic() {
-    panic!("I_StartTic unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn __toread(_: i32) -> i32 {
-    panic!("__toread unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn close(_: i32) -> i32 {
-    panic!("close unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn write(_: i32, _: i32, _: i32) -> i32 {
-    panic!("write unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn fstat(_: i32, _: i32) -> i32 {
-    panic!("fstat unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn __uflow(_: i32) -> i32 {
-    panic!("__uflow unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn mbrtowc(_: i32, _: i32, _: i32, _: i32) -> i32 {
-    panic!("mbrtowc unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn realloc(_: i32, _: i32) -> i32 {
-    panic!("realloc unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn mbsinit(_: i32) -> i32 {
-    panic!("mbsinit unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn scalbn(_: f64, _: i32) -> f64 {
-    panic!("scalbn unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn copysignl(_: i32, _: i64, _: i64, _: i64, _: i64) {
-    panic!("copysignl unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn scalbnl(_: i32, _: i64, _: i64, _: i32) {
-    panic!("scalbnl unimplemented");
-}
-
-#[no_mangle]
-extern "C" fn fmodl(_: i32, _: i64, _: i64, _: i64, _: i64) {
-    panic!("fmodl unimplemented");
-}
-
-// end generated
 
 fn main() {
     log!(
@@ -380,7 +219,7 @@ fn main() {
         log!("panic occurred: \"{}\" {}\n{:?}", p, l, panic_info);
     }));
 
-    println!("Hello, world from rust!");
+    println!("Hello, world from rust! (println! working)");
 
     // TODO: set global variables
     // myargc=2 and myargv={"-2"}
