@@ -1,5 +1,9 @@
+#[macro_use]
+extern crate lazy_static;
+
 pub mod js_imports;
 mod printf;
+mod malloc;
 mod unimplemented_libc;
 
 #[macro_export]

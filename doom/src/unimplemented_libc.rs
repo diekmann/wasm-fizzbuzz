@@ -91,11 +91,6 @@ extern "C" fn mbrtowc(_: i32, _: i32, _: i32, _: i32) -> i32 {
 }
 
 #[no_mangle]
-extern "C" fn realloc(_: i32, _: i32) -> i32 {
-    panic!("realloc unimplemented");
-}
-
-#[no_mangle]
 extern "C" fn mbsinit(_: i32) -> i32 {
     panic!("mbsinit unimplemented");
 }

@@ -1,5 +1,5 @@
 use std::ffi::CString;
-use std::ffi::{c_void, CStr};
+use std::ffi::{CStr};
 use std::os::raw::{c_char, c_int};
 
 #[allow(non_camel_case_types)]
@@ -54,19 +54,6 @@ extern "C" fn getenv(name: *const c_char) -> *const c_char { //TODO returning an
         }
     };
     result
-}
-
-#[no_mangle]
-extern "C" fn malloc(size: usize) -> *const c_void {
-    let mut mem: Vec<u8> = std::vec::Vec::with_capacity(size);
-    unsafe { mem.set_len(size) };
-    let static_ref: &'static mut [u8] = mem.leak(); //TODO make free()-able.
-    static_ref as *mut [u8] as *mut c_void
-}
-
-#[no_mangle]
-extern "C" fn free(_: i32) {
-    panic!("free unimplemented");
 }
 
 static mut SINGLE_THREAD_ERRNO: c_int = 0; // YOLO
@@ -194,9 +181,6 @@ extern "C" fn I_FinishUpdate() {
 extern "C" fn I_ReadScreen(_: i32) {
     panic!("I_ReadScreen unimplemented");
 }
-
-
-
 
 fn main() {
     log!(
