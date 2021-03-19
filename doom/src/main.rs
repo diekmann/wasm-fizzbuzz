@@ -203,9 +203,19 @@ extern "C" fn I_SetPalette(_: i32) {
     log!("I_SetPalette unimplemented");
 }
 
+// C libraries
+extern "C" {
+    // v_video.h
+    static screens: [*const u8; 5];
+}
+
+#[link(wasm_import_module = "js")]
+extern "C" {
+    fn js_draw_screen(ptr: *const u8);
+}
+
 #[no_mangle]
 extern "C" fn I_FinishUpdate() {
-    panic!("I_FinishUpdate unimplemented");
     // Draws the screen
     // Doom's C sources define
     //
@@ -215,6 +225,11 @@ extern "C" fn I_FinishUpdate() {
     //
     // I think only screens[0] is needed.
     // The screens are SCREENWIDTH*SCREENHEIGHT, which is 320x200
+    unsafe {
+        let the_screen = screens[0];
+        js_draw_screen(the_screen);
+    }
+    panic!("I_FinishUpdate unimplemented");
 }
 
 #[no_mangle]

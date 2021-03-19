@@ -10,6 +10,8 @@
   </head>
 
   <body>
+    <canvas id="screen" width="320" height="200">This is where the DooM screen should render.</canvas>
+
     <script>
       var memory = new WebAssembly.Memory({ initial : 86 });
 
@@ -24,13 +26,33 @@
         // TODO: maybe wait for animation frame?
         let t = new Date();
         timeval[0] = t.getSeconds();
-        timeval[1] = t.getMilliseconds() * 1000 // as usec YOLO;
+        timeval[1] = t.getMilliseconds() * 1000 // as usec YOLO; Doom wants 1/70th second tics, so we should be fine.
+      }
+
+      const canvas = document.getElementById('screen');
+      const doom_screen_width = 320;
+      const doom_screen_height = 200;
+
+      function DrawCanvas(ptr) {
+        console.log("DrawCanvas", ptr);
+        var doom_screen = new Uint8Array(memory.buffer, ptr, doom_screen_width*doom_screen_height);
+        var ctx = canvas.getContext('2d');
+        var render_screen = ctx.createImageData(doom_screen_width, doom_screen_height);
+        for (i=0; i < doom_screen_width*doom_screen_height; ++i) {
+          render_screen.data[i*4 +0] = doom_screen[i]; // red
+          render_screen.data[i*4 +1] = 42; // green
+          render_screen.data[i*4 +2] = 42; // blue
+          render_screen.data[i*4 +3] = 255; // alpha
+        }
+
+        ctx.putImageData(render_screen, 0, 0);
       }
 
       var importObject = {
         js: {
           console_log: consoleLogString,
           js_timeofday: GetTimeOfDay,
+          js_draw_screen: DrawCanvas,
         },
         env: {
           memory: memory
