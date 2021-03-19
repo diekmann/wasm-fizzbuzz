@@ -35,15 +35,11 @@
 
       function DrawCanvas(ptr) {
         console.log("DrawCanvas", ptr);
-        var doom_screen = new Uint8Array(memory.buffer, ptr, doom_screen_width*doom_screen_height);
+        var doom_screen = new Uint8Array(memory.buffer, ptr, doom_screen_width*doom_screen_height*4);
         var ctx = canvas.getContext('2d');
         var render_screen = ctx.createImageData(doom_screen_width, doom_screen_height);
-        for (i=0; i < doom_screen_width*doom_screen_height; ++i) {
-          // TODO: this is wrong! Do I need to lookup something in a structure from XCreateColormap???
-          render_screen.data[i*4 +0] = ((doom_screen[i] & 0b11100000) >>> 5) * 32; // red
-          render_screen.data[i*4 +1] = ((doom_screen[i] & 0b00011100) >>> 2) * 32; // green
-          render_screen.data[i*4 +2] = ((doom_screen[i] & 0b00000011) >>> 0) * 64; // blue
-          render_screen.data[i*4 +3] = 255; // alpha
+        for (i=0; i < doom_screen_width*doom_screen_height*4; ++i) {
+          render_screen.data[i] = doom_screen[i]; // Is there some memcpy in JS?
         }
 
         ctx.putImageData(render_screen, 0, 0);

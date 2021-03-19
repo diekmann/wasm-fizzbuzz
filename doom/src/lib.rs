@@ -2,8 +2,8 @@
 extern crate lazy_static;
 
 pub mod js_imports;
-mod printf;
 mod malloc;
+mod printf;
 mod unimplemented_libc;
 
 #[macro_export]
