@@ -352,7 +352,7 @@ extern "C" fn I_FinishUpdate() {
     unsafe {
         js_draw_screen(canvas.as_ptr());
     }
-    panic!("I_FinishUpdate unimplemented");
+    crate::log!("I_FinishUpdate");
 }
 
 #[no_mangle]

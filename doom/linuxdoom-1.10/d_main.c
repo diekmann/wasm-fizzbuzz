@@ -351,7 +351,7 @@ void D_Display (void)
 //
 extern  boolean         demorecording;
 
-void D_DoomLoop (void)
+void D_DoomLoop_prepare (void)
 {
     if (demorecording)
 	G_BeginRecording ();
@@ -365,9 +365,10 @@ void D_DoomLoop (void)
     }
 	
     I_InitGraphics ();
+}
 
-    while (1)
-    {
+
+void D_DoomLoop_loop (void) {
 	// frame syncronous IO operations
 	I_StartFrame ();                
 	
@@ -403,7 +404,13 @@ void D_DoomLoop (void)
 	// Update sound output.
 	I_SubmitSound();
 #endif
-    }
+}
+
+void D_DoomLoop (void) { // TODO: remove!!
+	D_DoomLoop_prepare();
+	while(1){
+		D_DoomLoop_loop();
+	}
 }
 
 
@@ -1170,5 +1177,6 @@ void D_DoomMain (void)
 
     }
 
-    D_DoomLoop ();  // never returns
+    //D_DoomLoop ();  // never returns // inversion of control, browser controls the loop.
+	D_DoomLoop_prepare();
 }

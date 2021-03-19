@@ -59,6 +59,12 @@
       WebAssembly.instantiateStreaming(fetch('target/wasm32-unknown-unknown/debug/doom.wasm'), importObject)
       .then(obj => {
         obj.instance.exports.main();
+
+        function step(timestamp) {
+          obj.instance.exports.doom_loop_step();
+          window.requestAnimationFrame(step);
+        }
+        window.requestAnimationFrame(step);
       });
     </script>
   </body>

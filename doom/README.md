@@ -111,3 +111,11 @@ But using git tag `llvmorg-11.1.0`.
 Dat feel! After so much theory and no way to test. Finally seeing the first screen of doom rendered. Awesome!
 
 ![Doom rendering the first screen to an HTML5 canvas](imgs/doom_first_screen_renders_to_canvas.png)
+
+---
+
+If I don't make `I_FinishUpdate` `panic!()`, then doom runs in its infinite game loop.
+Unfortunately, this runs at 100% CPU, firefox complains that a website is misbehaving, and nothing is rendered, since the browser has no chance of drawing the animation.
+
+Probably, I want to change doom such that doom itself is not looping, but I can call the loop via `window.requestAnimationFrame()`.
+This somehow inverses control and gives the browser a chance to render the frames.
