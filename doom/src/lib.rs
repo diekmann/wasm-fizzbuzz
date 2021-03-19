@@ -4,6 +4,8 @@ extern crate lazy_static;
 pub mod js_imports;
 mod malloc;
 mod printf;
+mod video;
+mod gamefile;
 mod unimplemented_libc;
 
 #[macro_export]

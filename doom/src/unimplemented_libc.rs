@@ -1,3 +1,8 @@
+use std::os::raw::{c_char, c_int};
+
+#[allow(non_camel_case_types)]
+pub type c_wchar = ::std::os::raw::c_long;
+
 // generated
 
 #[no_mangle]
@@ -111,3 +116,20 @@ extern "C" fn fmodl(_: i32, _: i64, _: i64, _: i64, _: i64) {
 }
 
 // end generated
+
+#[no_mangle]
+extern "C" fn wctomb(_: *const c_char, _: c_wchar) -> c_int {
+    panic!("wctomb unimplemented");
+}
+
+#[no_mangle]
+extern "C" fn frexpl(_: i32, _: i64, _: i64, _: i32) {
+    // type??
+    panic!("frexpls unimplemented");
+}
+
+#[no_mangle]
+extern "C" fn fabsl(_: i32, _: i64, _: i64) {
+    // type??
+    panic!("fabsl unimplemented");
+}
