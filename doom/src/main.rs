@@ -211,6 +211,8 @@ extern "C" {
 
 #[link(wasm_import_module = "js")]
 extern "C" {
+    // ptr points to a SCREENWIDTH*SCREENHEIGHT array.
+    // Each byte represents one 256-color PseudoColor Pixel.
     fn js_draw_screen(ptr: *const u8);
 }
 

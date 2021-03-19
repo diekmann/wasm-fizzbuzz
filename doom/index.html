@@ -39,9 +39,10 @@
         var ctx = canvas.getContext('2d');
         var render_screen = ctx.createImageData(doom_screen_width, doom_screen_height);
         for (i=0; i < doom_screen_width*doom_screen_height; ++i) {
-          render_screen.data[i*4 +0] = doom_screen[i]; // red
-          render_screen.data[i*4 +1] = 42; // green
-          render_screen.data[i*4 +2] = 42; // blue
+          // TODO: this is wrong! Do I need to lookup something in a structure from XCreateColormap???
+          render_screen.data[i*4 +0] = ((doom_screen[i] & 0b11100000) >>> 5) * 32; // red
+          render_screen.data[i*4 +1] = ((doom_screen[i] & 0b00011100) >>> 2) * 32; // green
+          render_screen.data[i*4 +2] = ((doom_screen[i] & 0b00000011) >>> 0) * 64; // blue
           render_screen.data[i*4 +3] = 255; // alpha
         }
 
