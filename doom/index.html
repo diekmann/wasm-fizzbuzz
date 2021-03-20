@@ -82,8 +82,36 @@
 
       WebAssembly.instantiateStreaming(fetch('target/wasm32-unknown-unknown/debug/doom.wasm'), importObject)
       .then(obj => {
+
+        // Initialize.
         obj.instance.exports.main();
 
+        let doomKeyCode = function(keyCode) {
+          // Doom seems to use mostly the same keycodes, except for the following (maybe I'm missing a few.)
+          switch (keyCode) {
+            case 8:
+              return 127; // KEY_BACKSPACE
+            case 37:
+              return 0xac; // KEY_LEFTARROW
+            case 38:
+              return 0xad; // KEY_UPARROW
+            case 39:
+              return 0xae;0xae // KEY_RIGHTARROW // KEY_RIGHTARROW
+            case 40:
+              return 0xaf; // KEY_DOWNARROW
+            default:
+              return keyCode;
+          }
+        };
+
+        document.addEventListener('keydown', function(event) {
+          obj.instance.exports.add_browser_event(0 /*KeyDown*/, doomKeyCode(event.keyCode));
+        });
+        document.addEventListener('keyup', function(event) {
+          obj.instance.exports.add_browser_event(1 /*KeyUp*/, doomKeyCode(event.keyCode));
+        });
+
+        // Main game loop
         function step(timestamp) {
           obj.instance.exports.doom_loop_step();
           window.requestAnimationFrame(step);

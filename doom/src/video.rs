@@ -1,5 +1,6 @@
-
 use std::os::raw::{c_int};
+use std::collections::VecDeque;
+use std::sync::Mutex;
 
 #[no_mangle]
 extern "C" fn I_InitGraphics() {
@@ -15,7 +16,7 @@ extern "C" fn I_StartFrame() {
 
 // d_event.h: evtype_t
 #[repr(C)]
-enum EventType
+pub enum EventType
 {
     KeyDown,
     KeyUp,
@@ -33,6 +34,22 @@ struct Event
     data3: c_int,		// mouse/joystick y move
 }
 
+// Shared queue where JavaScript may asynchronously place events, such as keypresses.
+lazy_static! {
+    static ref INPUT_EVENT_QUEUE: Mutex<VecDeque<Event>> = Mutex::from(VecDeque::new());
+}
+
+#[no_mangle]
+pub extern "C" fn add_browser_event(evtype: EventType, data1: i32){
+    let mut q = INPUT_EVENT_QUEUE.lock().expect("INPUT_EVENT_QUEUE locking failed (called from JS to add events)");
+    q.push_back(Event{
+        evtype,
+        data1,
+        data2: 0,
+        data3: 0,
+    })
+}
+
 extern "C" {
     fn D_PostEvent(ev: *const Event);
 }
@@ -43,22 +60,17 @@ extern "C" fn I_StartTic() {
     // should get inputs (e.g. key presses/releases)
     // and send them to D_PostEvent().
 
-    const KEY_ENTER: c_int = 13;
-
     fn post_event(ev: &Event) {
         unsafe {
             D_PostEvent(ev);
         }
     };
 
-    // TODO: remove hard-coded enter pressing.
-    let ev = Event{
-        evtype: EventType::KeyDown,
-        data1: KEY_ENTER,
-        data2: 0,
-        data3: 0,
-    };
-    post_event(&ev);
+
+    let mut q = INPUT_EVENT_QUEUE.lock().expect("INPUT_EVENT_QUEUE locking failed (called from rust to consume events)");
+    while let Some(ev) = q.pop_front() {
+        post_event(&ev);
+    }
 }
 
 #[no_mangle]
