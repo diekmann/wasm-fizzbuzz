@@ -1,3 +1,6 @@
+
+use std::os::raw::{c_int};
+
 #[no_mangle]
 extern "C" fn I_InitGraphics() {
     crate::log!("I_InitGraphics (TODO)");
@@ -10,11 +13,52 @@ extern "C" fn I_StartFrame() {
     // // er?
 }
 
+// d_event.h: evtype_t
+#[repr(C)]
+enum EventType
+{
+    KeyDown,
+    KeyUp,
+    Mouse,
+    Joystick,
+}
+
+// d_event.h: event_t
+#[repr(C)]
+struct Event
+{
+    evtype: EventType,
+    data1: c_int,		// keys / mouse/joystick buttons
+    data2: c_int,		// mouse/joystick x move
+    data3: c_int,		// mouse/joystick y move
+}
+
+extern "C" {
+    fn D_PostEvent(ev: *const Event);
+}
+
 #[no_mangle]
 extern "C" fn I_StartTic() {
     crate::log!("I_StartTic unimplemented!!!!!!!!!!!!!!!!!!");
     // should get inputs (e.g. key presses/releases)
     // and send them to D_PostEvent().
+
+    const KEY_ENTER: c_int = 13;
+
+    fn post_event(ev: &Event) {
+        unsafe {
+            D_PostEvent(ev);
+        }
+    };
+
+    // TODO: remove hard-coded enter pressing.
+    let ev = Event{
+        evtype: EventType::KeyDown,
+        data1: KEY_ENTER,
+        data2: 0,
+        data3: 0,
+    };
+    post_event(&ev);
 }
 
 #[no_mangle]
@@ -357,7 +401,9 @@ extern "C" fn I_FinishUpdate() {
 
 #[no_mangle]
 extern "C" fn I_ReadScreen(_: i32) {
-    panic!("I_ReadScreen unimplemented");
+    crate::log!("I_ReadScreen unimplemented");
+    // memcpy (scr, screens[0], SCREENWIDTH*SCREENHEIGHT);
+    // probably keeping the original C code is the simplest.
 }
 
 
