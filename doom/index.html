@@ -25,7 +25,8 @@
   <body>
     <h1>DooM</h1>
     <p>A wasm32 port of 1997 linuxdoom-1.10 with minimal modifications to the <a href="https://github.com/id-Software/DOOM">sources</a>.</p>
-    <canvas id="screen" width="320" height="200">This is where the DooM screen should render.</canvas>
+    <canvas id="screen" width="320" height="200">This is where the DooM screen should render.</canvas><br>
+    number of gettimeofday calls: <span id="gettimeofday_stats">0</span><br>
     <div id="output"></div>
 
     <script>
@@ -45,9 +46,12 @@
         }
       }
 
+      const gettimeofday_stats = document.getElementById("gettimeofday_stats");
+
       function  GetTimeOfDay(ptr) {
+        gettimeofday_stats.innerText = parseInt(gettimeofday_stats.innerText) + 1;
         var timeval = new Uint32Array(memory.buffer, ptr, 2);
-        // TODO: maybe wait for animation frame?
+        // TODO: maybe wait for animation frame or make more efficient? Doom polls this quite often!!
         const t = new Date();
         timeval[0] = t.getSeconds();
         timeval[1] = t.getMilliseconds() * 1000 // as usec YOLO; Doom wants 1/70th second tics, so we should be fine.
@@ -58,7 +62,6 @@
       const doom_screen_height = 200;
 
       function DrawCanvas(ptr) {
-        console.log("DrawCanvas", ptr);
         var doom_screen = new Uint8Array(memory.buffer, ptr, doom_screen_width*doom_screen_height*4);
         var ctx = canvas.getContext('2d');
         var render_screen = ctx.createImageData(doom_screen_width, doom_screen_height);
@@ -91,12 +94,16 @@
           switch (keyCode) {
             case 8:
               return 127; // KEY_BACKSPACE
+            case 17:
+              return (0x80+0x1d); // KEY_RCTRL
+            case 18:
+              return (0x80+0x38); // KEY_RALT
             case 37:
               return 0xac; // KEY_LEFTARROW
             case 38:
               return 0xad; // KEY_UPARROW
             case 39:
-              return 0xae;0xae // KEY_RIGHTARROW // KEY_RIGHTARROW
+              return 0xae; // KEY_RIGHTARROW // KEY_RIGHTARROW
             case 40:
               return 0xaf; // KEY_DOWNARROW
             default:

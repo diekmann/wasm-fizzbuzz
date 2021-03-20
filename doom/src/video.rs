@@ -48,6 +48,8 @@ pub extern "C" fn add_browser_event(evtype: EventType, data1: i32){
         data2: 0,
         data3: 0,
     })
+
+    // TODO: also support mouse.
 }
 
 extern "C" {
@@ -56,7 +58,6 @@ extern "C" {
 
 #[no_mangle]
 extern "C" fn I_StartTic() {
-    crate::log!("I_StartTic unimplemented!!!!!!!!!!!!!!!!!!");
     // should get inputs (e.g. key presses/releases)
     // and send them to D_PostEvent().
 
@@ -408,7 +409,6 @@ extern "C" fn I_FinishUpdate() {
     unsafe {
         js_draw_screen(canvas.as_ptr());
     }
-    crate::log!("I_FinishUpdate");
 }
 
 #[no_mangle]
