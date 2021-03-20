@@ -1,8 +1,5 @@
 # doom is a 32bit application, so only 32bit targets make sense.
 
-[target.i686-unknown-linux-gnu]
-runner = "./run_in_256colors.sh"
-
 [target.wasm32-unknown-unknown]
 # not a real runner, rather "disassemble" for now
 runner = "./dump_wasm_imports.sh"
@@ -14,4 +11,5 @@ rustflags = [
 target = "wasm32-unknown-unknown"
 
 [net]
+# Hello future corny, this will cause problems in an GitHub actions workflow.
 offline = true

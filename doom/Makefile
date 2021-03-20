@@ -1,6 +1,6 @@
 BUILDDIR = target/wasm32-unknown-unknown/release
 
-fizzbuzz.wasm: src/*.rs
+doom.wasm: src/*.rs
 	 cargo build --release
 	 # TODO: wasm-opt?
 	 cp ${BUILDDIR}/doom.wasm doom.wasm
