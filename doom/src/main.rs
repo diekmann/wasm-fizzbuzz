@@ -1,5 +1,8 @@
-use std::ffi::CString;
-use std::os::raw::{c_char, c_int, c_long};
+use std::os::raw::{c_int, c_long};
+use std::ptr;
+
+#[macro_use]
+extern crate lazy_static;
 
 
 #[allow(non_camel_case_types)]
@@ -13,7 +16,7 @@ extern "C" {
 
     // m_argv.c
     static mut myargc: c_int;
-    static mut myargv: *const *const c_char;
+    static mut myargv: *const *const u8; //c_char;
 }
 
 // Macros to print to JavaScript Console.
@@ -56,6 +59,25 @@ extern "C" fn gettimeofday(tv: *mut Timeval, _tz: i32) -> c_int {
     0 // success
 }
 
+lazy_static! {
+    // ARGV must have 'static lifetime, since Doom may look at it at any point.
+    // The type signature ensures that the argv we are constructing lives forever.
+    // leaks memory, so it should only be called once.
+    static ref SAFE_ARGV: &'static [&'static [u8]] = {
+        // C strings end with zero
+        let argv0 = b"linuxxdoom\0";
+        let argv = vec![&argv0[..]];
+        argv.leak()
+    };
+}
+
+// only call once, leaks memory, because the argv we point to must live forever.
+fn make_c_argv() -> *const *const u8 {
+    let mut argv: std::vec::Vec<*const u8> = SAFE_ARGV.iter().map(|s| s.as_ptr()).collect();
+    argv.push(ptr::null()); // Calling convention compatibility: a final NULL separates argv from envp.
+    argv.leak().as_ptr()
+}
+
 fn main() {
     log!(
         "Hello, {}! Answer={} ({:b} in binary)",
@@ -79,15 +101,10 @@ fn main() {
 
     println!("Hello, world from rust! (println! working)");
 
-    // TODO: set global variables
-    // myargc=2 and myargv={"-2"}
-
-    let binary_name = CString::new("linuxxdoom").unwrap();
-    let first_commandline_arg = CString::new("-2").unwrap();
-    let argv: [*const c_char; 2] = [binary_name.as_ptr(), first_commandline_arg.as_ptr()];
+    // TODO: better set global variables and keep them alive forever.
     unsafe {
-        myargc = argv.len() as c_int;
-        myargv = &argv as *const *const c_char;
+        myargc = SAFE_ARGV.len() as c_int;
+        myargv = make_c_argv();
         D_DoomMain();
     };
 }
