@@ -83,7 +83,7 @@
         }
       };
 
-      WebAssembly.instantiateStreaming(fetch('target/wasm32-unknown-unknown/debug/doom.wasm'), importObject)
+      WebAssembly.instantiateStreaming(fetch('doom.wasm'), importObject)
       .then(obj => {
 
         // Initialize.
