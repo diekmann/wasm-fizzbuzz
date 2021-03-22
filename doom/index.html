@@ -48,7 +48,7 @@
 
       const gettimeofday_stats = document.getElementById("gettimeofday_stats");
 
-      function  GetTimeOfDay(ptr) {
+      function  getTimeOfDay(ptr) {
         gettimeofday_stats.innerText = parseInt(gettimeofday_stats.innerText) + 1;
         var timeval = new Uint32Array(memory.buffer, ptr, 2);
         // TODO: maybe wait for animation frame or make more efficient? Doom polls this quite often!!
@@ -61,7 +61,7 @@
       const doom_screen_width = 320;
       const doom_screen_height = 200;
 
-      function DrawCanvas(ptr) {
+      function drawCanvas(ptr) {
         var doom_screen = new Uint8Array(memory.buffer, ptr, doom_screen_width*doom_screen_height*4);
         var ctx = canvas.getContext('2d');
         var render_screen = ctx.createImageData(doom_screen_width, doom_screen_height);
@@ -75,8 +75,8 @@
       var importObject = {
         js: {
           console_log: consoleLogString,
-          js_timeofday: GetTimeOfDay,
-          js_draw_screen: DrawCanvas,
+          js_timeofday: getTimeOfDay,
+          js_draw_screen: drawCanvas,
         },
         env: {
           memory: memory
@@ -107,6 +107,12 @@
             case 40:
               return 0xaf; // KEY_DOWNARROW
             default:
+              if (keyCode >= 65 /*A*/ && keyCode <= 90 /*Z*/) {
+                return keyCode + 32; // ASCII to lower case
+              }
+              if (keyCode >= 112 /*F1*/ && keyCode <= 123 /*F12*/ ) {
+                return keyCode + 75; // KEY_F1
+              }
               return keyCode;
           }
         };
