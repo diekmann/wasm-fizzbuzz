@@ -4,7 +4,6 @@ use std::ptr;
 #[macro_use]
 extern crate lazy_static;
 
-
 #[allow(non_camel_case_types)]
 pub type c_long_double = ::std::os::raw::c_double; //?
 
@@ -22,17 +21,11 @@ extern "C" {
 // Macros to print to JavaScript Console.
 use doom::{log, println};
 
-
-
-
 static mut SINGLE_THREAD_ERRNO: c_int = 0; // YOLO
 #[no_mangle]
 extern "C" fn ___errno_location() -> *const c_int {
     unsafe { &SINGLE_THREAD_ERRNO }
 }
-
-
-
 
 // struct timeval { time_t tv_sec; suseconds_t tv_usec; };
 #[repr(C)]
@@ -98,7 +91,7 @@ fn main() {
         log!("panic occurred: \"{}\" {}\n{:?}", p, l, panic_info);
     }));
 
-    println!("Hello, world from rust! (println! working)");
+    println!("Hello, world from rust! 🦀🦀🦀 (println! working)");
 
     // TODO: better set global variables and keep them alive forever.
     unsafe {
