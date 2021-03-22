@@ -384,13 +384,28 @@ The wasm likely runs, hits a `panic!("unimplemented")` and terminates errors by 
 In [f558a6b](https://github.com/diekmann/wasm-fizzbuzz/commit/f558a6bf98bba124311efbf890a901ed4ceb2550), we load the wasm32 binary, but we also add a print function, so we can see a `"Hello, world from rust!"` before we run into a panic.
 We print to the JavaScrip console by sharing the wasm memory with JavaScript, as described by <https://developer.mozilla.org/en-US/docs/WebAssembly/Understanding_the_text_format>.
 
-TODO: screenshot!
+![wasm32 starting and printing Hello World to JS console](imgs/hello_world.png)
 
 ---
 
-TODO: more text here
+Now the fun part begins: we can finally write some rust to implement the missing pieces. 🦀🦀🦀
+
+1. [14e97ce](https://github.com/diekmann/wasm-fizzbuzz/commit/14e97ce4bc792520630031ae4885712d2c5f0ef4): Dump `panic!()`s to js console. 
+1. [d7a23ba](https://github.com/diekmann/wasm-fizzbuzz/commit/d7a23bae29652ca2b4fc5136c1c5045520eecf3f): Implementing `getenv`, well, only the part doom cares about.
+1. [7b96305](https://github.com/diekmann/wasm-fizzbuzz/commit/7b96305973b2d23330e9dd79442cbbe3d7ab1981): Getting `printf` to work. I did not want to change how the musl libc defaults on a `FILE *` abstractionm that's why I simply implement the `writev` syscall in rust, but only for `STDOUT` and `STDERR`, not for arbitrary files.
+1. [aaadb1c](https://github.com/diekmann/wasm-fizzbuzz/commit/aaadb1c6c79c9801a6583e72b56b4835639682e6): `malloc`. Well, more like YOLO-malloc, but who needs `free` anyway? Well, doom does not need `free`, so this implementation is actually quite good *for this use case*!
+1. Implementing [`access`](https://github.com/diekmann/wasm-fizzbuzz/blob/9620e6a498a39e8b571866914892adb9ea8b30dd/doom/src/main.rs#L122) and [`fopen`](https://github.com/diekmann/wasm-fizzbuzz/blob/9620e6a498a39e8b571866914892adb9ea8b30dd/doom/src/main.rs#L139), but only to support loading the game files (called a WAD file in DooM).
+1. [4e1ca6b](https://github.com/diekmann/wasm-fizzbuzz/commit/4e1ca6bb4a5f9aa7f719b9adb90baa62b6f9520f): Inlining the wad file, and with `read` and `lseek` implemented (but only for the single gamefile `doom1.wad`), Doom can load its gamefile.
+1. [b462869](https://github.com/diekmann/wasm-fizzbuzz/commit/b4628695541401b6bf6aa1bab26e7404e085fe7f): refactoring, splitting the huge `main.rs` into a library. I learned about `mod` (inline a file) vs. `use` (reference the public stuff in a library). Also `$crate::` vs `crate::` in a macro was really confusing for me as a beginner.
+1. [df30abf](https://github.com/diekmann/wasm-fizzbuzz/commit/df30abf71ea8a5a125d63ecbd068fc60e2655145): I was so proud about my `YOLO-malloc`, but Doom also needs `realloc`, so it's time to write a real implementation for those. I need the external `lazy_static` crate, since I need to store the malloc state between `malloc` and `realloc` calls and the only way compatible with the way the C Doom library calls us is a global mutable variable. The `lazy_static` crate is the only external dependency we have!
+1. [0814bc0](https://github.com/diekmann/wasm-fizzbuzz/commit/0814bc09bb0a72c60b0fd945eb18649b3bfb9486): Implementing `gettimeofday`. This is one of the few functions where we need support from JavaScript, since WebAssembly does not know about the date or about wall-clock timers in general. Doom uses `gettimeofday` to compute when its "ticks" are happening, so the game runs at the same speed on slow as well as on fast hardware.
+
 
 ---
+
+FINALLY! in [f946c51](https://github.com/diekmann/wasm-fizzbuzz/commit/f946c513ba62dfb84d72d2f1e45d2a25bc190389) I'm starting with the graphics driver.
+Doom has a global variable `screens[0]` which is a byte array of `SCREENWIDTH*SCREENHEIGHT`, i.e. `320x200` with the current screen contents.
+I'm dumping those bytes to an HTML5 canvas of the same size, totally ignoring what color values the bytes encode.
 
 Dat feel! After so much theory and no way to test. Finally seeing the first screen of doom rendered. Awesome!
 
@@ -398,15 +413,31 @@ Dat feel! After so much theory and no way to test. Finally seeing the first scre
 
 ---
 
-If I don't make `I_FinishUpdate` `panic!()`, then doom runs in its infinite game loop.
-Unfortunately, this runs at 100% CPU, firefox complains that a website is misbehaving, and nothing is rendered, since the browser has no chance of drawing the animation.
+Turns out the bytes of `screens[0]` do not directly correspond to any color.
+Instead, they refer to an entry in an X11 Colormap.
+This Colormap maps the 256 possible bytes to one RGB color.
+In [c39559f](https://github.com/diekmann/wasm-fizzbuzz/commit/c39559f2ac92d6d82a60f443a87bec56a9f0f319), I extracted that colormap from Doom and use it.
 
-Probably, I want to change doom such that doom itself is not looping, but I can call the loop via `window.requestAnimationFrame()`.
-This somehow inverses control and gives the browser a chance to render the frames.
+Doom is now displaying the titleframe correctly on an HTML5 canvas!!
+
+TODO: screenshot
 
 ---
 
+While continuing, I realized that if I don't make Doom's `I_FinishUpdate` function `panic!()`, then nothing gets rendered to the HTML5 canvas,
+This is because Doom runs in its [infinite game loop](https://github.com/diekmann/wasm-fizzbuzz/blob/e855dce6bba2dc8bf01820efba9bdcb81d841bb3/doom/linuxdoom-1.10/d_main.c#L369).
+Unfortunately, this runs at 100% CPU, firefox complains that a website is misbehaving, and nothing is rendered, since the browser has no chance of drawing the animation.
+
+I changed doom such that doom itself is not looping, but I can call the loop via `window.requestAnimationFrame()`.
+This somehow inverses control and gives the browser a chance to render the frames.
+
+In [95ed6a1](https://github.com/diekmann/wasm-fizzbuzz/commit/95ed6a18e52c66edcfefe4af67a22324c32a1e0c), this inversion of control is implemented and the HTML5 canvas now shows Doom's title screen and cycles between advertisement frames where you can obtain a full copy of Doom.
+
+---
+
+TODO: 
 argv mistake.
 'static and borrowing and stack
 
+TODO: 
 rendering and playing and inputs!
