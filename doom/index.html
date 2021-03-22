@@ -10,14 +10,13 @@
 
     <style>
       #output {
-        background-color: rgb(0, 172, 172);
+        border: 3px groove aquamarine;
+        background-color: bisque;
         width: 600px;
         height: 300px;
         font-family: monospace, serif;
         font-size: 10px;
         overflow-y: scroll;
-        display: flex;
-        flex-direction: column-reverse;
       }
     </style>
   </head>
@@ -34,15 +33,25 @@
 
       const output = document.getElementById("output");
 
+      function readWasmString(offset, length) {
+        const bytes = new Uint8Array(memory.buffer, offset, length);
+        return new TextDecoder('utf8').decode(bytes);
+      }
+
       function consoleLogString(offset, length) {
-        var bytes = new Uint8Array(memory.buffer, offset, length);
-        var string = new TextDecoder('utf8').decode(bytes);
-        console.log(string);
+        var string = readWasmString(offset, length);
+        console.log("\"" + string + "\"");
 
         const lines = string.split('\n');
         for (i=0; i<lines.length; ++i) {
-          output.appendChild(document.createTextNode(lines[i]));
+          if (lines[i].length == 0) {
+            continue;
+          }
+          var t = document.createElement("span");
+          t.appendChild(document.createTextNode(lines[i]));
+          output.appendChild(t);
           output.appendChild(document.createElement("br"));
+          t.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"}); /*smooth scrolling is experimental according to MDN*/
         }
       }
 
