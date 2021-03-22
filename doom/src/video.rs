@@ -1,5 +1,5 @@
-use std::os::raw::{c_int};
 use std::collections::VecDeque;
+use std::os::raw::c_int;
 use std::sync::Mutex;
 
 #[no_mangle]
@@ -16,8 +16,7 @@ extern "C" fn I_StartFrame() {
 
 // d_event.h: evtype_t
 #[repr(C)]
-pub enum EventType
-{
+pub enum EventType {
     KeyDown,
     KeyUp,
     Mouse,
@@ -26,12 +25,11 @@ pub enum EventType
 
 // d_event.h: event_t
 #[repr(C)]
-struct Event
-{
+struct Event {
     evtype: EventType,
-    data1: c_int,		// keys / mouse/joystick buttons
-    data2: c_int,		// mouse/joystick x move
-    data3: c_int,		// mouse/joystick y move
+    data1: c_int, // keys / mouse/joystick buttons
+    data2: c_int, // mouse/joystick x move
+    data3: c_int, // mouse/joystick y move
 }
 
 // Shared queue where JavaScript may asynchronously place events, such as keypresses.
@@ -40,9 +38,11 @@ lazy_static! {
 }
 
 #[no_mangle]
-pub extern "C" fn add_browser_event(evtype: EventType, data1: i32){
-    let mut q = INPUT_EVENT_QUEUE.lock().expect("INPUT_EVENT_QUEUE locking failed (called from JS to add events)");
-    q.push_back(Event{
+pub extern "C" fn add_browser_event(evtype: EventType, data1: i32) {
+    let mut q = INPUT_EVENT_QUEUE
+        .lock()
+        .expect("INPUT_EVENT_QUEUE locking failed (called from JS to add events)");
+    q.push_back(Event {
         evtype,
         data1,
         data2: 0,
@@ -67,8 +67,9 @@ extern "C" fn I_StartTic() {
         }
     };
 
-
-    let mut q = INPUT_EVENT_QUEUE.lock().expect("INPUT_EVENT_QUEUE locking failed (called from rust to consume events)");
+    let mut q = INPUT_EVENT_QUEUE
+        .lock()
+        .expect("INPUT_EVENT_QUEUE locking failed (called from rust to consume events)");
     while let Some(ev) = q.pop_front() {
         post_event(&ev);
     }
@@ -386,7 +387,6 @@ static COLORMAP: [RGBAColor; 256] = [
     XColor(42919, 27756, 27756).to_rgba(),
 ];
 
-
 // The screens are SCREENWIDTH*SCREENHEIGHT, which is 320x200
 const SCREENSIZE: usize = 320 * 200;
 
@@ -403,7 +403,7 @@ extern "C" fn I_FinishUpdate() {
     // extern	byte*		screens[5];
     //
     // I think only screens[0] is needed.
-    let mut canvas: [RGBAColor; SCREENSIZE] = [RGBAColor(0,0,0,255); SCREENSIZE];
+    let mut canvas: [RGBAColor; SCREENSIZE] = [RGBAColor(0, 0, 0, 255); SCREENSIZE];
     let the_screen = unsafe { std::slice::from_raw_parts(screens[0], SCREENSIZE) };
     for i in 0..SCREENSIZE {
         canvas[i] = COLORMAP[the_screen[i] as usize]
@@ -416,11 +416,8 @@ extern "C" fn I_FinishUpdate() {
 #[no_mangle]
 extern "C" fn I_ReadScreen(scr: *mut u8) {
     // Doom does: memcpy (/*dst!!*/ scr, /*src!!*/ screens[0], SCREENWIDTH*SCREENHEIGHT);
-    unsafe {
-        std::ptr::copy_nonoverlapping(screens[0], scr, SCREENSIZE)
-    }
+    unsafe { std::ptr::copy_nonoverlapping(screens[0], scr, SCREENSIZE) }
 }
-
 
 #[no_mangle]
 extern "C" fn I_ShutdownGraphics() {
