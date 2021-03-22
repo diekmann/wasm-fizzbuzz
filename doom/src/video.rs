@@ -386,6 +386,10 @@ static COLORMAP: [RGBAColor; 256] = [
     XColor(42919, 27756, 27756).to_rgba(),
 ];
 
+
+// The screens are SCREENWIDTH*SCREENHEIGHT, which is 320x200
+const SCREENSIZE: usize = 320 * 200;
+
 #[no_mangle]
 extern "C" fn I_FinishUpdate() {
     // TODO: move to testing
@@ -399,8 +403,6 @@ extern "C" fn I_FinishUpdate() {
     // extern	byte*		screens[5];
     //
     // I think only screens[0] is needed.
-    // The screens are SCREENWIDTH*SCREENHEIGHT, which is 320x200
-    const SCREENSIZE: usize = 320 * 200;
     let mut canvas: [RGBAColor; SCREENSIZE] = [RGBAColor(0,0,0,255); SCREENSIZE];
     let the_screen = unsafe { std::slice::from_raw_parts(screens[0], SCREENSIZE) };
     for i in 0..SCREENSIZE {
@@ -412,10 +414,11 @@ extern "C" fn I_FinishUpdate() {
 }
 
 #[no_mangle]
-extern "C" fn I_ReadScreen(_: i32) {
-    crate::log!("I_ReadScreen unimplemented");
-    // memcpy (scr, screens[0], SCREENWIDTH*SCREENHEIGHT);
-    // probably keeping the original C code is the simplest.
+extern "C" fn I_ReadScreen(scr: *mut u8) {
+    // Doom does: memcpy (/*dst!!*/ scr, /*src!!*/ screens[0], SCREENWIDTH*SCREENHEIGHT);
+    unsafe {
+        std::ptr::copy_nonoverlapping(screens[0], scr, SCREENSIZE)
+    }
 }
 
 
