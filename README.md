@@ -16,8 +16,11 @@ Non-goal: We will *not* implement our own WebAssembly interpreter or runtime, bu
 * Part 1) [Introdcution to WebAssembly](intro_examples/)
 * Part 2) [Implementing FizzBuzz with WebAssembly by Hand](wat/)
 * Part 3) [Implementing FizzBuzz in Rust and Compiling to WebAssembly](rust/)
+* Part 4) [Porting 1997 DooM to WebAssembly from Scratch](doom/)
 
 ---
 
 Demo at <https://diekmann.github.io/wasm-fizzbuzz/rust/>, deployed from (Part 3) via GitHub Actions to GitHub Pages.
+
+Play doom at <https://diekmann.github.io/wasm-fizzbuzz/doom/>.
 
