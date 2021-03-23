@@ -393,12 +393,19 @@ Now the fun part begins: we can finally write some rust to implement the missing
 1. [14e97ce](https://github.com/diekmann/wasm-fizzbuzz/commit/14e97ce4bc792520630031ae4885712d2c5f0ef4): Dump `panic!()`s to js console. 
 1. [d7a23ba](https://github.com/diekmann/wasm-fizzbuzz/commit/d7a23bae29652ca2b4fc5136c1c5045520eecf3f): Implementing `getenv`, well, only the part doom cares about.
 1. [7b96305](https://github.com/diekmann/wasm-fizzbuzz/commit/7b96305973b2d23330e9dd79442cbbe3d7ab1981): Getting `printf` to work. I did not want to change how the musl libc defaults on a `FILE *` abstractionm that's why I simply implement the `writev` syscall in rust, but only for `STDOUT` and `STDERR`, not for arbitrary files.
+   ![printf working, malloc is next to be implemented](imgs/no_malloc.png)
 1. [aaadb1c](https://github.com/diekmann/wasm-fizzbuzz/commit/aaadb1c6c79c9801a6583e72b56b4835639682e6): `malloc`. Well, more like YOLO-malloc, but who needs `free` anyway? Well, doom does not need `free`, so this implementation is actually quite good *for this use case*!
 1. Implementing [`access`](https://github.com/diekmann/wasm-fizzbuzz/blob/9620e6a498a39e8b571866914892adb9ea8b30dd/doom/src/main.rs#L122) and [`fopen`](https://github.com/diekmann/wasm-fizzbuzz/blob/9620e6a498a39e8b571866914892adb9ea8b30dd/doom/src/main.rs#L139), but only to support loading the game files (called a WAD file in DooM).
 1. [4e1ca6b](https://github.com/diekmann/wasm-fizzbuzz/commit/4e1ca6bb4a5f9aa7f719b9adb90baa62b6f9520f): Inlining the wad file, and with `read` and `lseek` implemented (but only for the single gamefile `doom1.wad`), Doom can load its gamefile.
+    ![loading gamefile working, realloc is next to be implemented](imgs/no_realloc.png)
 1. [b462869](https://github.com/diekmann/wasm-fizzbuzz/commit/b4628695541401b6bf6aa1bab26e7404e085fe7f): refactoring, splitting the huge `main.rs` into a library. I learned about `mod` (inline a file) vs. `use` (reference the public stuff in a library). Also `$crate::` vs `crate::` in a macro was really confusing for me as a beginner.
 1. [df30abf](https://github.com/diekmann/wasm-fizzbuzz/commit/df30abf71ea8a5a125d63ecbd068fc60e2655145): I was so proud about my `YOLO-malloc`, but Doom also needs `realloc`, so it's time to write a real implementation for those. I need the external `lazy_static` crate, since I need to store the malloc state between `malloc` and `realloc` calls and the only way compatible with the way the C Doom library calls us is a global mutable variable. The `lazy_static` crate is the only external dependency we have!
+    ![doom starting to the point where it would ouput graphics.](imgs/doom_nographicsdriver.png)
+    The nonprintable characters are "backspace" caracters doom uses during loading, where doom assumes that STDOUT is a terminal.
+    I guess this is kind of a progress bar.
 1. [0814bc0](https://github.com/diekmann/wasm-fizzbuzz/commit/0814bc09bb0a72c60b0fd945eb18649b3bfb9486): Implementing `gettimeofday`. This is one of the few functions where we need support from JavaScript, since WebAssembly does not know about the date or about wall-clock timers in general. Doom uses `gettimeofday` to compute when its "ticks" are happening, so the game runs at the same speed on slow as well as on fast hardware.
+
+![doom starting and gettimeofday implementation shown](imgs/gettimeofday.png)
 
 
 ---
@@ -420,7 +427,7 @@ In [c39559f](https://github.com/diekmann/wasm-fizzbuzz/commit/c39559f2ac92d6d82a
 
 Doom is now displaying the titleframe correctly on an HTML5 canvas!!
 
-TODO: screenshot
+![Doom rendering the titlescreen with correct colors](imgs/doom_titlescreen_html5.png)
 
 ---
 
