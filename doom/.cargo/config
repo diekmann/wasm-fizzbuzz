@@ -10,6 +10,5 @@ rustflags = [
 [build]
 target = "wasm32-unknown-unknown"
 
-[net]
-# Hello future corny, this will cause problems in an GitHub actions workflow.
-offline = true
+# [net]
+# offline = true
