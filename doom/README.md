@@ -438,13 +438,184 @@ Unfortunately, this runs at 100% CPU, firefox complains that a website is misbeh
 I changed doom such that doom itself is not looping, but I can call the loop via `window.requestAnimationFrame()`.
 This somehow inverses control and gives the browser a chance to render the frames.
 
+Essentially, we are changing Doom's C sources from
+
+```C
+void D_DoomLoop (void)
+{
+  I_InitGraphics ();
+  // More doom initialization
+
+  while (1)
+  {
+    I_StartFrame ();
+    // More doom gameloop
+  }
+}
+```
+
+to
+
+```C
+void D_DoomLoop_prepare (void)
+{
+  I_InitGraphics ();
+  // More doom initialization
+}
+
+void D_DoomLoop_loop (void) {
+  I_StartFrame ();
+  // More doom gameloop
+}
+```
+
+where `D_DoomLoop_loop()` only executes one loop iteration; the `while (1)` is gone.
+
+In addition, we change Doom's `D_DoomMain()` to call `D_DoomLoop_prepare()` instead of `D_DoomLoop()`.
+
+Our rust code remains unmodified and still calls `D_DoomMain()` to ask Doom to initialize:
+
+```rust
+// C libraries
+extern "C" {
+    // d_main.c
+    fn D_DoomMain();
+
+    // m_argv.c
+    static mut myargc: c_int;
+    static mut myargv: *const *const c_char;
+}
+
+fn main() {
+    // ... setup panic handler
+
+    println!("Hello, world from rust! (println! working)");
+
+    let binary_name = CString::new("linuxxdoom").unwrap();
+    let first_commandline_arg = CString::new("-2").unwrap();
+    let argv: [*const c_char; 2] = [binary_name.as_ptr(), first_commandline_arg.as_ptr()];
+    unsafe {
+        myargc = argv.len() as c_int;
+        myargv = &argv as *const *const c_char;
+        D_DoomMain();
+    };
+}
+```
+
+Previously, this would enter Doom's main loop and never return.
+Now, this returns once Doom is initialized.
+
+We can now expose the `D_DoomLoop_loop()` to JavaScript to give JavaScript control over the loop:
+
+```rust
+extern "C" {
+    fn D_DoomLoop_loop();
+}
+
+#[no_mangle]
+pub extern "C" fn doom_loop_step() {
+    unsafe { D_DoomLoop_loop() };
+}
+```
+
+Now, JavaScript can control the loop and only proceed when animation frames are ready:
+
+```JavaScript
+WebAssembly.instantiateStreaming(fetch('target/wasm32-unknown-unknown/debug/doom.wasm'), importObject)
+.then(obj => {
+  obj.instance.exports.main(); // initialize
+
+  function step(timestamp) {
+    obj.instance.exports.doom_loop_step();
+    window.requestAnimationFrame(step);
+  }
+  window.requestAnimationFrame(step);
+});
+```
+
+
 In [95ed6a1](https://github.com/diekmann/wasm-fizzbuzz/commit/95ed6a18e52c66edcfefe4af67a22324c32a1e0c), this inversion of control is implemented and the HTML5 canvas now shows Doom's title screen and cycles between advertisement frames where you can obtain a full copy of Doom.
 
 ---
 
-TODO: 
-argv mistake.
-'static and borrowing and stack
+The previous inversion of control introduced an interesting bug which the rust language could have prevented:
+Once we startgiving Doom keyboard input and start the game, Doom dereferences invalid memory and crashes!
 
-TODO: 
-rendering and playing and inputs!
+The problem is `argv`.
+But where was the bug introduced in the previous refactoring?
+Essentially, the old and the new buggy code look the same:
+
+```Rust
+let argv: [*const c_char; 2] = [..., ...];
+unsafe {
+    myargc = argv.len() as c_int;
+    myargv = &argv as *const *const c_char;
+    D_DoomMain();
+};
+```
+
+The `argv` is allocated on the stack.
+In the old code, `D_DoomMain()` never returned, thus, `argv` is always valid.
+With the refactoring, `D_DoomMain()` returns once Doom is initialized.
+Hence, `argv` is cleaned up afterwards.
+Yet, Doom looks into `argv` later, in the main game loop, which crashes the game.
+
+Rust's lifetime analysis could have prevented the error.
+Yet, C does not support lifetimes and there is no ffi-lifetime analysis which could have uncovered this issue.
+But at least we can model our discovery in Rust's type system: `argv` must be valid eternally.
+This means, instead of `*const *const c_char`, we use `&'static [&'static [u8]]`.
+Look at those two `'static` lifetimes.
+Ultimately, we will have to convert to the C type without lifetimes ``*const *const u8` at some point, but I try to keep the Rust type of `&'static [&'static [u8]]` around for as long as possible.
+Side note: I silently switched from `c_char` to `u8` because FFI is hard and I could not find a way to safely cast them.
+
+In [ff54e97](https://github.com/diekmann/wasm-fizzbuzz/commit/ff54e9770be9a02ed76fb94dfb14ded8cd1cbcf2), we implemented this safer `argv` handling.
+
+Basically, the safer code is
+
+```Rust
+lazy_static! {
+    // ARGV must have 'static lifetime, since Doom may look at it at any point.
+    // The type signature ensures that the argv we are constructing lives forever.
+    // leaks memory, so it should only be called once.
+    static ref SAFE_ARGV: &'static [&'static [u8]] = {
+        // C strings end with zero
+        let argv0 = b"linuxxdoom\0";
+        let argv = vec![&argv0[..]];
+        argv.leak()
+    };
+}
+
+// only call once, leaks memory, because the argv we point to must live forever.
+fn make_c_argv() -> *const *const u8 {
+    let mut argv: std::vec::Vec<*const u8> = SAFE_ARGV.iter().map(|s| s.as_ptr()).collect();
+    argv.push(ptr::null()); // Calling convention compatibility: a final NULL separates argv from envp.
+    argv.leak().as_ptr()
+}
+```
+
+Doom is no more crashing.
+
+
+---
+
+Finally, we need to make Doom respond to keyboard input and we are done.
+Turns out, this is quite simple:
+In [a7673d0](https://github.com/diekmann/wasm-fizzbuzz/commit/a7673d09bb5dc998d5bbe3bc0b6bf3908557420e), we register JavaScript event listeners for key presses and insert the corresponding key code into Doom's event queue.
+
+---
+
+That's it!
+There is more fine-tuning to do, but we now have a playable Doom game in the browser.
+I hope you enjoyed this from-scratch series.
+
+Here is a summary of the directory structure
+
+* `build.rs`: Rust build script. Tells the rust compiler to build and link to our small libc, compiler runtime, and doom library.
+* `clang_compiler_rt`: C compiler runtime, to compile as static archive.
+* `musl-1.2.2`: libc for C string functions, to compile as static archive.
+* `linuxdoom-1.10`: original doom sources, to compile as static archive.
+* `doom1.wad`: Doom game file.
+* `src`: Rust sources.
+* `index.html`: HTML and Javascript to load the compiled WebAssembly and provide keyboard input and HTML5 canvas rendering output.
+
+Now go to https://diekmann.github.io/wasm-fizzbuzz/doom and start shooting monsters!
