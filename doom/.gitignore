@@ -1,0 +1,5 @@
+/.vscode/
+/linuxdoom-1.10/linux/
+/musl-1.2.2/dist/
+/target/
+doom.wasm

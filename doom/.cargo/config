@@ -1,0 +1,15 @@
+# doom is a 32bit application, so only 32bit targets make sense.
+
+[target.wasm32-unknown-unknown]
+# not a real runner, rather "disassemble" for now
+runner = "./dump_wasm_imports.sh"
+rustflags = [
+  "-C", "link-args=--import-memory",
+]
+
+[build]
+target = "wasm32-unknown-unknown"
+
+[net]
+# Hello future corny, this will cause problems in an GitHub actions workflow.
+offline = true
