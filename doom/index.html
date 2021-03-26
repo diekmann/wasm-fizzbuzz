@@ -41,6 +41,7 @@
     <div id="output"></div>
 
     <script>
+      'use strict';
       var memory = new WebAssembly.Memory({ initial : 108 });
 
       const output = document.getElementById("output");
@@ -58,7 +59,7 @@
       function appendOutput(style) {
         return function(offset, length) {
           const lines = readWasmString(offset, length).split('\n');
-          for (i=0; i<lines.length; ++i) {
+          for (var i=0; i<lines.length; ++i) {
             if (lines[i].length == 0) {
               continue;
             }
@@ -101,7 +102,7 @@
         var doom_screen = new Uint8Array(memory.buffer, ptr, doom_screen_width*doom_screen_height*4);
         var ctx = canvas.getContext('2d');
         var render_screen = ctx.createImageData(doom_screen_width, doom_screen_height);
-        for (i=0; i < doom_screen_width*doom_screen_height*4; ++i) {
+        for (var i=0; i < doom_screen_width*doom_screen_height*4; ++i) {
           render_screen.data[i] = doom_screen[i]; // Is there some memcpy in JS?
         }
 
