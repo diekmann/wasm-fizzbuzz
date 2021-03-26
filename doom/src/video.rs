@@ -388,7 +388,10 @@ static COLORMAP: [RGBAColor; 256] = [
 ];
 
 // The screens are SCREENWIDTH*SCREENHEIGHT, which is 320x200
-const SCREENSIZE: usize = 320 * 200;
+const SCREENWIDTH: usize = 320;
+const SCREENHEIGHT: usize = 200;
+const SCREENSIZE: usize = SCREENWIDTH * SCREENHEIGHT;
+
 
 #[no_mangle]
 extern "C" fn I_FinishUpdate() {
@@ -410,11 +413,23 @@ extern "C" fn I_FinishUpdate() {
     // If Javascript throws a `RuntimeError: index out of bounds` and the traceback
     // shows this is inside a `memset`, it's likely because we exhausted the stack size.
     static mut CANVAS: [RGBAColor; SCREENSIZE*4] = [RGBAColor(0, 0, 0, 255); SCREENSIZE*4];
-    for i in 0..SCREENSIZE {
-        unsafe {
-            CANVAS[i] = COLORMAP[the_screen[i] as usize]
-        }
-    }
+
+     // Double the screen size. Pixel perfect, no interpolation.
+     const MULTIPLY: usize = 2;
+
+     for y in 0..SCREENHEIGHT {
+         for x in 0..SCREENWIDTH {
+             let pixel = the_screen[y*SCREENWIDTH + x] as usize;
+             let rgba_pixel = COLORMAP[pixel];
+             unsafe {
+                CANVAS[y*MULTIPLY*MULTIPLY*SCREENWIDTH + x*MULTIPLY] = rgba_pixel;
+                CANVAS[y*MULTIPLY*MULTIPLY*SCREENWIDTH + x*MULTIPLY + 1] = rgba_pixel;
+                CANVAS[y*MULTIPLY*MULTIPLY*SCREENWIDTH + SCREENWIDTH*MULTIPLY + x*MULTIPLY] = rgba_pixel;
+                CANVAS[y*MULTIPLY*MULTIPLY*SCREENWIDTH + SCREENWIDTH*MULTIPLY + x*MULTIPLY + 1] = rgba_pixel;
+             }
+         }
+     }
+
     unsafe {
         js_draw_screen(CANVAS.as_ptr());
     }

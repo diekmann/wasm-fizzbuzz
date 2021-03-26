@@ -12,8 +12,8 @@
       #output {
         border: 3px groove aquamarine;
         background-color: bisque;
-        width: 600px;
-        height: 300px;
+        width: 550px;
+        height: 400px;
         font-family: monospace, serif;
         font-size: 10px;
         overflow-y: scroll;
@@ -28,6 +28,10 @@
         font-weight: bold;
         color:brown;
       }
+
+      .container {
+        display: flex;
+      }
     </style>
   </head>
 
@@ -35,10 +39,13 @@
     <h1>DooM</h1>
     <p>A wasm32 port of 1997 linuxdoom-1.10 with minimal modifications to the <a href="https://github.com/id-Software/DOOM">sources</a>.</p>
     <p>Use enter to start the game, arrow keys to move, ctrl to shoot, spacebar to open gates. No mobile touch input supported right now.</p>
-    <canvas id="screen" width="320" height="200">This is where the DooM screen should render.</canvas><br>
+    <div class="container">
+      <canvas id="screen" width="640" height="400">This is where the DooM screen should render.</canvas>
+      <span>&nbsp;</span>
+      <div id="output"></div>
+    </div>
     number of gettimeofday calls: <span id="gettimeofday_stats">0</span><br>
     FPS: <span id="fps_stats">0</span> Total Frames drawn: <span id="drawframes_stats">0</span><br>
-    <div id="output"></div>
 
     <script>
       'use strict';
@@ -86,8 +93,8 @@
       }
 
       const canvas = document.getElementById('screen');
-      const doom_screen_width = 320;
-      const doom_screen_height = 200;
+      const doom_screen_width = 320*2;
+      const doom_screen_height = 200*2;
 
       const fps_stats = document.getElementById("fps_stats");
       const drawframes_stats = document.getElementById("drawframes_stats");
