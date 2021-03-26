@@ -403,13 +403,20 @@ extern "C" fn I_FinishUpdate() {
     // extern	byte*		screens[5];
     //
     // I think only screens[0] is needed.
-    let mut canvas: [RGBAColor; SCREENSIZE] = [RGBAColor(0, 0, 0, 255); SCREENSIZE];
     let the_screen = unsafe { std::slice::from_raw_parts(screens[0], SCREENSIZE) };
+
+    // We make the CANVAS a static varibale, so it is not freshly allocated onto rust's
+    // small stack on each call.
+    // If Javascript throws a `RuntimeError: index out of bounds` and the traceback
+    // shows this is inside a `memset`, it's likely because we exhausted the stack size.
+    static mut CANVAS: [RGBAColor; SCREENSIZE*4] = [RGBAColor(0, 0, 0, 255); SCREENSIZE*4];
     for i in 0..SCREENSIZE {
-        canvas[i] = COLORMAP[the_screen[i] as usize]
+        unsafe {
+            CANVAS[i] = COLORMAP[the_screen[i] as usize]
+        }
     }
     unsafe {
-        js_draw_screen(canvas.as_ptr());
+        js_draw_screen(CANVAS.as_ptr());
     }
 }
 
