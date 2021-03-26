@@ -608,7 +608,7 @@ That's it!
 There is more fine-tuning to do, but we now have a playable Doom game in the browser.
 I hope you enjoyed this from-scratch series.
 
-Here is a summary of the directory structure
+As of [5d07829](https://github.com/diekmann/wasm-fizzbuzz/tree/5d0782913be405628bdd64e9e67111069bbfcd08), here is a summary of the directory structure
 
 * `build.rs`: Rust build script. Tells the rust compiler to build and link to our small libc, compiler runtime, and doom library.
 * `clang_compiler_rt`: C compiler runtime, to compile as static archive.
