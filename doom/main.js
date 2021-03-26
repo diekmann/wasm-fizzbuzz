@@ -30,16 +30,27 @@ function appendOutput(style) {
     }
 }
 
-const gettimeofday_stats = document.getElementById("gettimeofday_stats");
+const gettimeps_stats = document.getElementById("gettimeps_stats");
+const gettime_stats = document.getElementById("gettime_stats");
+var gettime_calls_total = 0;
+var gettime_calls = 0; // in current second
+window.setInterval(function(){
+    gettime_calls_total += gettime_calls;
+    gettime_stats.innerText = gettime_calls_total;
+    gettimeps_stats.innerText = gettime_calls/1000 + "k";
+    gettime_calls = 0;
+}, 1000);
 
 function  getTimeOfDay(ptr) {
-    gettimeofday_stats.innerText = parseInt(gettimeofday_stats.innerText) + 1;
+    ++gettime_calls;
     var timeval = new Uint32Array(memory.buffer, ptr, 2);
     // TODO: maybe wait for animation frame or make more efficient? Doom polls this quite often!!
-    // Since Doom does not really care about the absolute wall clock, but only wants time differences, maybe window.performance.now() would be better here??
+    // Since Doom does not really care about the absolute wall clock, but only wants time differences, maybe performance.now() would be better here??
+    //const t = performance.now(); //new Date();
     const t = new Date();
     timeval[0] = t.getSeconds();
     timeval[1] = t.getMilliseconds() * 1000 // as usec YOLO; Doom wants 1/70th second tics, so we should be fine.
+
 }
 
 const canvas = document.getElementById('screen');
@@ -48,11 +59,13 @@ const doom_screen_height = 200*2;
 
 const fps_stats = document.getElementById("fps_stats");
 const drawframes_stats = document.getElementById("drawframes_stats");
-var numberOfDraws = 0;
+var number_of_draws_total = 0;
+var number_of_draws = 0; // in current second
 window.setInterval(function(){
-    drawframes_stats.innerText = parseInt(drawframes_stats.innerText) + numberOfDraws;
-    fps_stats.innerText = numberOfDraws;
-    numberOfDraws = 0;
+    number_of_draws_total += number_of_draws;
+    drawframes_stats.innerText = number_of_draws_total;
+    fps_stats.innerText = number_of_draws;
+    number_of_draws = 0;
 }, 1000);
 
 function drawCanvas(ptr) {
@@ -65,7 +78,7 @@ function drawCanvas(ptr) {
 
     ctx.putImageData(render_screen, 0, 0);
 
-    ++numberOfDraws;
+    ++number_of_draws;
 }
 
 var importObject = {
