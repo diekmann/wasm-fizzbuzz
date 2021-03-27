@@ -30,27 +30,21 @@ function appendOutput(style) {
     }
 }
 
-const gettimeps_stats = document.getElementById("gettimeps_stats");
-const gettime_stats = document.getElementById("gettime_stats");
-var gettime_calls_total = 0;
-var gettime_calls = 0; // in current second
-window.setInterval(function(){
-    gettime_calls_total += gettime_calls;
-    gettime_stats.innerText = gettime_calls_total;
-    gettimeps_stats.innerText = gettime_calls/1000 + "k";
-    gettime_calls = 0;
+const getmsps_stats = document.getElementById("getmsps_stats");
+const getms_stats = document.getElementById("getms_stats");
+var getms_calls_total = 0;
+var getms_calls = 0; // in current second
+window.setInterval(function() {
+    getms_calls_total += getms_calls;
+    getmsps_stats.innerText = getms_calls/1000 + "k";
+    getms_stats.innerText = getms_calls_total;
+    getms_calls = 0;
 }, 1000);
 
-function  getTimeOfDay(ptr) {
-    ++gettime_calls;
-    var timeval = new Uint32Array(memory.buffer, ptr, 2);
-    // TODO: maybe wait for animation frame or make more efficient? Doom polls this quite often!!
-    // Since Doom does not really care about the absolute wall clock, but only wants time differences, maybe performance.now() would be better here??
-    //const t = performance.now(); //new Date();
-    const t = new Date();
-    timeval[0] = t.getSeconds();
-    timeval[1] = t.getMilliseconds() * 1000 // as usec YOLO; Doom wants 1/70th second tics, so we should be fine.
 
+function getMilliseconds() {
+    ++getms_calls;
+    return performance.now();
 }
 
 const canvas = document.getElementById('screen');
@@ -86,7 +80,7 @@ var importObject = {
         js_console_log: appendOutput("log"),
         js_stdout: appendOutput("stdout"),
         js_stderr: appendOutput("stderr"),
-        js_timeofday: getTimeOfDay,
+        js_milliseconds_since_start: getMilliseconds,
         js_draw_screen: drawCanvas,
     },
     env: {
