@@ -363,7 +363,7 @@ void GetPackets (void)
 // Builds ticcmds for console player,
 // sends out a packet
 //
-int      gametime;
+int      gametime = 0;
 
 void NetUpdate (void)
 {
@@ -633,7 +633,7 @@ int	oldnettics;
 
 extern	boolean	advancedemo;
 
-void TryRunTics (void)
+int TryRunTics (void)
 {
     int		i;
     int		lowtic;
@@ -643,6 +643,11 @@ void TryRunTics (void)
     int		availabletics;
     int		counts;
     int		numplaying;
+
+	// web modification: do NOT busy wait for a new tick, return control to browser.
+	if (I_GetTime()/ticdup <= gametime){
+		return 0; // no new tics available.
+	}
     
     // get real tics		
     entertic = I_GetTime ()/ticdup;
@@ -728,7 +733,7 @@ void TryRunTics (void)
 	if (I_GetTime ()/ticdup - entertic >= 20)
 	{
 	    M_Ticker ();
-	    return;
+	    return 1;
 	} 
     }
     
@@ -764,4 +769,7 @@ void TryRunTics (void)
 	}
 	NetUpdate ();	// check for new console commands
     }
+
+
+	return 1;
 }
