@@ -618,4 +618,16 @@ As of [5d07829](https://github.com/diekmann/wasm-fizzbuzz/tree/5d0782913be405628
 * `src`: Rust sources.
 * `index.html`: HTML and Javascript to load the compiled WebAssembly and provide keyboard input and HTML5 canvas rendering output.
 
+---
+
+There is more to optimize. The firefox performance profiler says we spend most of our time in `gettimeofday`.
+In [0ad44fb](https://github.com/diekmann/wasm-fizzbuzz/commit/0ad44fb1a237c2a7721b6df11bb89e3c8cd0b81c), we remove this implementation completely, avoiding the need to construct a `Date` object in javascript and avoiding sedond and microsecond translation, since DooM just cares about the milliseconds since the start of the game, which happens to be what javascript's `performance.now()` provides.
+
+The game runs at ~35 FPS on my machine, but Chrome performance debugging tools still show many dropped frames, since the browser wants to animate at 60 FPS. In addition, since DooM is still polling the time to know when it can proceed, this is super energy inefficient and gives the browser no room for background tasks, such as garbage collection.
+In [f1685b1](https://github.com/diekmann/wasm-fizzbuzz/commit/f1685b14fe1f875b9a7f25e3f11de69acd493199), we make DooM to return immediately when running one step of its game loop if there is nothing to do, giving control back to the browser.
+Now, DooM still runs at ~35 FPS (this is what DooM was designed for), but the browser gets a chance to render its 60 animation frames per second and the system is mostly idle otherwise.
+I can clearly hear the difference, since my CPU fan is no longer spinning up when starting DooM.
+
+---
+
 Now go to https://diekmann.github.io/wasm-fizzbuzz/doom and start shooting monsters!
