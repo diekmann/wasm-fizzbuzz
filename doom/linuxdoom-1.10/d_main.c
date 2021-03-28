@@ -387,7 +387,10 @@ void D_DoomLoop_loop (void) {
 	}
 	else
 	{
-	    TryRunTics (); // will run at least one tic
+	    if (TryRunTics() == 0){
+			return; // web modification: do NOT busy wait for a new tick, return control to browser.
+		};
+		// we did run at least one tic.
 	}
 		
 	S_UpdateSounds (players[consoleplayer].mo);// move positional sounds
