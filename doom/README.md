@@ -620,13 +620,72 @@ As of [5d07829](https://github.com/diekmann/wasm-fizzbuzz/tree/5d0782913be405628
 
 ---
 
-There is more to optimize. The firefox performance profiler says we spend most of our time in `gettimeofday`.
-In [0ad44fb](https://github.com/diekmann/wasm-fizzbuzz/commit/0ad44fb1a237c2a7721b6df11bb89e3c8cd0b81c), we remove this implementation completely, avoiding the need to construct a `Date` object in javascript and avoiding sedond and microsecond translation, since DooM just cares about the milliseconds since the start of the game, which happens to be what javascript's `performance.now()` provides.
+There is more to optimize. The firefox performance profiler says we spend most of our time in `getTimeOfDay`.
 
-The game runs at ~35 FPS on my machine, but Chrome performance debugging tools still show many dropped frames, since the browser wants to animate at 60 FPS. In addition, since DooM is still polling the time to know when it can proceed, this is super energy inefficient and gives the browser no room for background tasks, such as garbage collection.
+![Firefox profiler shows getTimeOfDay as the most expensive function](imgs/getTimeOfDay_expensive.png)
+
+Essentially, `getTimeOfDay` is
+
+```JavaScript
+function  getTimeOfDay(ptr) {
+  var timeval = new Uint32Array(memory.buffer, ptr, 2); // to write result back to wasm memory.
+  const t = new Date();
+  timeval[0] = t.getSeconds();
+  timeval[1] = t.getMilliseconds() * 1000
+```
+
+In [0ad44fb](https://github.com/diekmann/wasm-fizzbuzz/commit/0ad44fb1a237c2a7721b6df11bb89e3c8cd0b81c), we remove `getTimeOfDay` completely, avoiding the need to construct a `Date` object in javascript and avoiding second and microsecond translation.
+We get away with this simplification, since DooM just cares about the milliseconds since the start of the game, which happens to be what javascript's `performance.now()` provides.
+
+Our new functions looks and feels much more performant:
+
+```JavaScript
+function getMilliseconds() {
+  return performance.now();
+}
+```
+
+```Rust
+#[link(wasm_import_module = "js")]
+extern "C" {
+    // i32 timestamps in milliseconds should be enough for over 500hours of DooM.
+    fn getMilliseconds() -> i32;
+}
+```
+
+![Firefox profiler shows getMilliseconds as less expensive expensive function](imgs/getMilliseconds.png)
+
+The new `getMilliseconds` function seems to be more effecient.
+More importantly, what the graph does not show: on my machine, I get about four times as many `getMilliseconds` calls per seconds as I had `getTimeOfDay` calls per second.
+This is because DooM polls the time aggressively so it knows when to advance to the next game tick.
+This keeps my CPU 100% busy and my CPU fan is spinning noticeably.
+While `getMilliseconds` is probably two to four times more efficient than `gettimeofday`, we are still wasting a lot of CPU and energy here on busy waiting.
+
+![DooM is busy waiting for time to progress](imgs/doombusywaiting.png)
+
+---
+
+The game runs at ~35 FPS on my machine, but Chrome performance debugging tools still show many dropped frames.
+All red lines are dropped frames.
+
+![Chrome developer tools showing dropped frames](imgs/droppedframes.png)
+
+This is because the browser wants to animate at 60 FPS. In addition, since DooM is still polling the time to know when it can proceed, this is super energy inefficient and gives the browser no room for background tasks, such as garbage collection.
 In [f1685b1](https://github.com/diekmann/wasm-fizzbuzz/commit/f1685b14fe1f875b9a7f25e3f11de69acd493199), we make DooM to return immediately when running one step of its game loop if there is nothing to do, giving control back to the browser.
 Now, DooM still runs at ~35 FPS (this is what DooM was designed for), but the browser gets a chance to render its 60 animation frames per second and the system is mostly idle otherwise.
+
+The Chrome performance debugging tools now look very green in the "Frames" row, confirming that we are no longer dropping frames.
+
+![Chrome developer tools showing no more dropped frames](imgs/nodroppedframes.png)
+
 I can clearly hear the difference, since my CPU fan is no longer spinning up when starting DooM.
+Since we are only called when an animation frame is ready, Doom is also polling `getMilliseconds` less aggressively (about 1000x less!) and the CPU load decreased drastically as well.
+
+![DooM is less busy waiting and the browser needs less cpu](imgs/doomefficient.png)
+
+Ultimately, Firefox performance tooling confirms that, while we are playing DooM, the computer spends most of its time being idle!
+
+![Firefox performance tooling shows we are mostly idle](imgs/idle.png)
 
 ---
 
