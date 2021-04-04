@@ -1,6 +1,6 @@
 BUILDDIR = target/wasm32-unknown-unknown/release
 
-doom.wasm: src/*.rs
+doom.wasm: src/*.rs clang_compiler_rt/* linuxdoom-1.10/*  musl-1.2.2/*
 	 cargo build --release
 	 # TODO: wasm-opt?
 	 cp ${BUILDDIR}/doom.wasm doom.wasm
