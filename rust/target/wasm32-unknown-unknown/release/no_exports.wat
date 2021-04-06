@@ -73,96 +73,95 @@
           local.get 1
           i32.const 3
           i32.rem_u
-          i32.eqz
           br_if 0 (;@3;)
-          block  ;; label = @4
-            block  ;; label = @5
-              local.get 1
-              i32.eqz
-              br_if 0 (;@5;)
-              i32.const 0
-              local.set 2
-              i32.const 1000000000
-              local.set 3
-              i32.const 1
-              local.set 4
-              local.get 1
-              local.set 5
-              block  ;; label = @6
-                loop  ;; label = @7
-                  local.get 3
-                  i32.eqz
-                  br_if 1 (;@6;)
-                  local.get 5
-                  local.get 5
-                  local.get 3
-                  i32.div_s
-                  local.tee 6
-                  local.get 3
-                  i32.mul
-                  i32.sub
-                  local.set 5
-                  local.get 4
-                  local.get 6
-                  i32.eqz
-                  i32.and
-                  local.set 7
-                  i32.const 1
-                  local.set 4
-                  local.get 3
-                  i32.const 10
-                  i32.div_u
-                  local.tee 8
-                  local.set 3
-                  local.get 7
-                  br_if 0 (;@7;)
-                  block  ;; label = @8
-                    local.get 2
-                    i32.const 11
-                    i32.eq
-                    br_if 0 (;@8;)
-                    local.get 0
-                    local.get 2
-                    i32.add
-                    local.get 6
-                    i32.const 48
-                    i32.add
-                    i32.store8
-                    local.get 2
-                    i32.const 1
-                    i32.add
-                    local.set 2
-                    i32.const 0
-                    local.set 4
-                    local.get 8
-                    local.set 3
-                    br 1 (;@7;)
-                  end
-                end
-                call $_ZN4core9panicking18panic_bounds_check17h81a63bf79280172dE
-                unreachable
-              end
-              local.get 2
-              i32.const 12
-              i32.lt_u
-              br_if 1 (;@4;)
-              local.get 2
-              call $_ZN4core5slice5index24slice_end_index_len_fail17h137fe51578ce6a78E
-              unreachable
-            end
-            local.get 0
-            i32.const 48
-            i32.store8
-            i32.const 1
-            local.set 2
-          end
-          local.get 0
-          local.get 2
+          i32.const 1048582
+          i32.const 4
           call $_ZN4rust4puts17h7724885b1133ad25E
           br 1 (;@2;)
         end
-        i32.const 1048582
-        i32.const 4
+        block  ;; label = @3
+          block  ;; label = @4
+            local.get 1
+            i32.eqz
+            br_if 0 (;@4;)
+            i32.const 0
+            local.set 2
+            i32.const 1000000000
+            local.set 3
+            i32.const 1
+            local.set 4
+            local.get 1
+            local.set 5
+            block  ;; label = @5
+              loop  ;; label = @6
+                local.get 3
+                i32.eqz
+                br_if 1 (;@5;)
+                local.get 5
+                local.get 5
+                local.get 3
+                i32.div_s
+                local.tee 6
+                local.get 3
+                i32.mul
+                i32.sub
+                local.set 5
+                local.get 4
+                local.get 6
+                i32.eqz
+                i32.and
+                local.set 7
+                i32.const 1
+                local.set 4
+                local.get 3
+                i32.const 10
+                i32.div_u
+                local.tee 8
+                local.set 3
+                local.get 7
+                br_if 0 (;@6;)
+                block  ;; label = @7
+                  local.get 2
+                  i32.const 11
+                  i32.eq
+                  br_if 0 (;@7;)
+                  local.get 0
+                  local.get 2
+                  i32.add
+                  local.get 6
+                  i32.const 48
+                  i32.add
+                  i32.store8
+                  local.get 2
+                  i32.const 1
+                  i32.add
+                  local.set 2
+                  i32.const 0
+                  local.set 4
+                  local.get 8
+                  local.set 3
+                  br 1 (;@6;)
+                end
+              end
+              call $_ZN4core9panicking18panic_bounds_check17hea69f7e7489ec724E
+              unreachable
+            end
+            local.get 2
+            i32.const 12
+            i32.lt_u
+            br_if 1 (;@3;)
+            local.get 2
+            call $_ZN4core5slice5index24slice_end_index_len_fail17h73468be5102bc4a4E
+            unreachable
+          end
+          local.get 0
+          i32.const 48
+          i32.store8
+          i32.const 1
+          local.set 2
+        end
+        local.get 0
+        local.get 2
         call $_ZN4rust4puts17h7724885b1133ad25E
       end
       local.get 1
@@ -177,13 +176,13 @@
     i32.const 16
     i32.add
     global.set 0)
-  (func $_ZN4core9panicking18panic_bounds_check17h81a63bf79280172dE (type 2)
-    call $_ZN4core9panicking9panic_fmt17hbd8a975261a5f466E
+  (func $_ZN4core9panicking18panic_bounds_check17hea69f7e7489ec724E (type 2)
+    call $_ZN4core9panicking9panic_fmt17h91d2023e5afe1929E
     unreachable)
-  (func $_ZN4core5slice5index24slice_end_index_len_fail17h137fe51578ce6a78E (type 0) (param i32)
-    call $_ZN4core9panicking9panic_fmt17hbd8a975261a5f466E
+  (func $_ZN4core5slice5index24slice_end_index_len_fail17h73468be5102bc4a4E (type 0) (param i32)
+    call $_ZN4core9panicking9panic_fmt17h91d2023e5afe1929E
     unreachable)
-  (func $_ZN4core9panicking9panic_fmt17hbd8a975261a5f466E (type 2)
+  (func $_ZN4core9panicking9panic_fmt17h91d2023e5afe1929E (type 2)
     call $rust_begin_unwind
     unreachable)
   (table (;0;) 1 1 funcref)
