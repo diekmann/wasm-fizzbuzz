@@ -122,12 +122,29 @@ WebAssembly.instantiateStreaming(fetch('doom.wasm'), importObject)
         }
     };
 
-    document.addEventListener('keydown', function(event) {
+    canvas.addEventListener('keydown', function(event) {
         obj.instance.exports.add_browser_event(0 /*KeyDown*/, doomKeyCode(event.keyCode));
-    });
-    document.addEventListener('keyup', function(event) {
+        event.preventDefault();
+    }, false);
+    canvas.addEventListener('keyup', function(event) {
         obj.instance.exports.add_browser_event(1 /*KeyUp*/, doomKeyCode(event.keyCode));
-    });
+        event.preventDefault();
+    }, false);
+
+    const focushint = document.getElementById("focushint");
+    const printFocusInHint = function(e) {
+        focushint.innerText = "Keyboard events will be captured as long as the the DOOM canvas has focus.";
+        focushint.style.fontWeight = "normal";
+    };
+    canvas.addEventListener('focusin', printFocusInHint, false);
+
+    canvas.addEventListener('focusout', function(e) {
+        focushint.innerText = "Click on the canvas to capute input and start playing.";
+        focushint.style.fontWeight = "bold";
+    }, false);
+
+    canvas.focus();
+    printFocusInHint();
 
     const animationfps_stats = document.getElementById("animationfps_stats");
     var number_of_animation_frames = 0; // in current second
