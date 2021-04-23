@@ -39,11 +39,11 @@ extern "C" {
 // Doom comment says: returns time in 1/70th second tics.
 // But it's actually more 1/35 second tics, i.e. optimized for 35FPS
 // I.e. one tic every 28.572ms.
-// Returns a monotonically uncreasing number of ticks.
+// Returns a monotonically increasing number of ticks.
 //
 #[no_mangle]
 extern "C" fn I_GetTime() -> c_int {
-    const TICRATE: c_int = 32;
+    const TICRATE: c_int = 35;
 
     let ms = unsafe { js_milliseconds_since_start() };
 
