@@ -96,35 +96,35 @@ impl<'a> Palette<'a> {
     }
 
     fn into_iter(self) -> PaletteIter<'a> {
-        PaletteIter{
-            p: self.0,
-            i: 0,
-        }
+        PaletteIter(self.0.into_iter())
     }
 }
 
-struct PaletteIter<'a>{
-    p: &'a [u8],
-    i: usize,
-}
+struct PaletteIter<'a>(std::slice::Iter<'a, u8>);
 
 impl Iterator for PaletteIter<'_> {
     type Item = (u8, u8, u8);
 
     fn next(&mut self) -> Option<(u8, u8, u8)>{
-        let i = self.i;
-        if i >= self.p.len() {
-            return None
-        }
-        self.i += 3;
-        Some((self.p[i], self.p[i+1], self.p[i+2]))
+        let r = match self.0.next() {
+            Some(r) => *r,
+            None => return None,
+        };
+        let g = match self.0.next() {
+            Some(g) => *g,
+            None => return None,
+        };
+        let b = match self.0.next() {
+            Some(b) => *b,
+            None => return None,
+        };
+        Some((r, g, b))
     }
 }
 
 #[no_mangle]
 extern "C" fn I_SetPalette(palette: *const u8) {
     let palette = unsafe { Palette::from(palette) };
-    let mut i = 0;
     let gt = unsafe{ gammatable[usegamma as usize] };
     for (i, (r, g, b)) in palette.into_iter().enumerate() {
         let r = gt[r as usize];
@@ -147,7 +147,7 @@ struct XColor(/*red*/ u16, /*green*/ u16, /*blue*/ u16);
 // The color we use fomr JavaScript to render to the HTML5 canvas.
 #[repr(C)]
 #[repr(packed)]
-#[derive(Clone, Copy)] // TODO: should be possible without those!
+#[derive(Clone, Copy)]
 struct RGBAColor(
     /*red*/ u8,
     /*green*/ u8,
