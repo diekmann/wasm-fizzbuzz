@@ -82,9 +82,25 @@ extern "C" fn I_UpdateNoBlit() {
     // // what is this?
 }
 
+
+extern "C" {
+    static usegamma: c_int;
+    static gammatable: [[u8; 256]; 5];
+}
+
 #[no_mangle]
-extern "C" fn I_SetPalette(_: i32) {
-    crate::log!("I_SetPalette unimplemented");
+extern "C" fn I_SetPalette(palette: *const u8) {
+    let palette = unsafe { std::slice::from_raw_parts(palette, 256*3) };
+    let mut i = 0;
+    let gt = unsafe{ gammatable[usegamma as usize] };
+    while i < palette.len() {
+        let r = gt[palette[i]   as usize];
+        let g = gt[palette[i+1] as usize];
+        let b = gt[palette[i+2] as usize];
+        let color = RGBAColor(r, g, b, 255);
+        unsafe { COLORMAP[i/3] = color };
+        i += 3;
+    }
 }
 
 // C libraries
@@ -128,7 +144,7 @@ impl XColor {
 // This needs to be mapped to the real color. Doom has its own mapping.
 // Generated in i_video.c in UploadNewPalette via
 // for (i=0 ; i<256 ; i++){printf("XColor(%hu, %hu, %hu).to_rgba(),\n", colors[i].red, colors[i].green, colors[i].blue);}
-static COLORMAP: [RGBAColor; 256] = [
+static mut COLORMAP: [RGBAColor; 256] = [
     XColor(257, 257, 257).to_rgba(),
     XColor(8224, 6168, 3084).to_rgba(),
     XColor(6168, 4112, 2056).to_rgba(),
@@ -420,8 +436,8 @@ extern "C" fn I_FinishUpdate() {
      for y in 0..SCREENHEIGHT {
          for x in 0..SCREENWIDTH {
              let pixel = the_screen[y*SCREENWIDTH + x] as usize;
-             let rgba_pixel = COLORMAP[pixel];
              unsafe {
+                let rgba_pixel = COLORMAP[pixel];
                 CANVAS[y*MULTIPLY*MULTIPLY*SCREENWIDTH + x*MULTIPLY] = rgba_pixel;
                 CANVAS[y*MULTIPLY*MULTIPLY*SCREENWIDTH + x*MULTIPLY + 1] = rgba_pixel;
                 CANVAS[y*MULTIPLY*MULTIPLY*SCREENWIDTH + SCREENWIDTH*MULTIPLY + x*MULTIPLY] = rgba_pixel;
