@@ -1,6 +1,7 @@
 'use strict';
 var memory = new WebAssembly.Memory({ initial : 108 });
 
+/*stdout and stderr goes here*/
 const output = document.getElementById("output");
 
 function readWasmString(offset, length) {
@@ -30,6 +31,7 @@ function appendOutput(style) {
     }
 }
 
+/*stats about how often doom polls the time*/
 const getmsps_stats = document.getElementById("getmsps_stats");
 const getms_stats = document.getElementById("getms_stats");
 var getms_calls_total = 0;
@@ -47,10 +49,12 @@ function getMilliseconds() {
     return performance.now();
 }
 
+/*doom is rendered here*/
 const canvas = document.getElementById('screen');
 const doom_screen_width = 320*2;
 const doom_screen_height = 200*2;
 
+/*printing stats*/
 const fps_stats = document.getElementById("fps_stats");
 const drawframes_stats = document.getElementById("drawframes_stats");
 var number_of_draws_total = 0;
@@ -75,6 +79,7 @@ function drawCanvas(ptr) {
     ++number_of_draws;
 }
 
+/*These functions will be available in WebAssembly. We also share the memory to share larger amounts of data with javascript, e.g. strings of the video output.*/
 var importObject = {
     js: {
         js_console_log: appendOutput("log"),
@@ -91,9 +96,11 @@ var importObject = {
 WebAssembly.instantiateStreaming(fetch('doom.wasm'), importObject)
     .then(obj => {
 
-    // Initialize.
+    /*Initialize Doom*/
     obj.instance.exports.main();
 
+
+    /*input handling*/
     let doomKeyCode = function(keyCode) {
         // Doom seems to use mostly the same keycodes, except for the following (maybe I'm missing a few.)
         switch (keyCode) {
@@ -108,7 +115,7 @@ WebAssembly.instantiateStreaming(fetch('doom.wasm'), importObject)
         case 38:
             return 0xad; // KEY_UPARROW
         case 39:
-            return 0xae; // KEY_RIGHTARROW // KEY_RIGHTARROW
+            return 0xae; // KEY_RIGHTARROW
         case 40:
             return 0xaf; // KEY_DOWNARROW
         default:
@@ -121,16 +128,37 @@ WebAssembly.instantiateStreaming(fetch('doom.wasm'), importObject)
             return keyCode;
         }
     };
+    let keyDown = function(keyCode) {obj.instance.exports.add_browser_event(0 /*KeyDown*/, keyCode);};
+    let keyUp = function(keyCode) {obj.instance.exports.add_browser_event(1 /*KeyUp*/, keyCode);};
 
+    /*keyboard input*/
     canvas.addEventListener('keydown', function(event) {
-        obj.instance.exports.add_browser_event(0 /*KeyDown*/, doomKeyCode(event.keyCode));
+        keyDown(doomKeyCode(event.keyCode));
         event.preventDefault();
     }, false);
     canvas.addEventListener('keyup', function(event) {
-        obj.instance.exports.add_browser_event(1 /*KeyUp*/, doomKeyCode(event.keyCode));
+        keyUp(doomKeyCode(event.keyCode));
         event.preventDefault();
     }, false);
 
+    /*mobile touch input*/
+    [["enterButton", 13],
+     ["leftButton", 0xac],
+     ["rightButton", 0xae],
+     ["upButton", 0xad],
+     ["downButton", 0xaf],
+     ["ctrlButton", 0x80+0x1d],
+     ["spaceButton", 32],
+     ["altButton", 0x80+0x38]].forEach(([elementID, keyCode]) => {
+        console.log(elementID + " for " + keyCode);
+        var button = document.getElementById(elementID);
+        //button.addEventListener("click", () => {keyDown(keyCode); keyUp(keyCode)} );
+        button.addEventListener("touchstart", () => keyDown(keyCode));
+        button.addEventListener("touchend", () => keyUp(keyCode));
+        button.addEventListener("touchcancel", () => keyUp(keyCode));
+    });
+
+    /*hint that the canvas should have focus to capute keyboard events*/
     const focushint = document.getElementById("focushint");
     const printFocusInHint = function(e) {
         focushint.innerText = "Keyboard events will be captured as long as the the DOOM canvas has focus.";
@@ -146,6 +174,7 @@ WebAssembly.instantiateStreaming(fetch('doom.wasm'), importObject)
     canvas.focus();
     printFocusInHint();
 
+    /*printing stats*/
     const animationfps_stats = document.getElementById("animationfps_stats");
     var number_of_animation_frames = 0; // in current second
     window.setInterval(function(){
@@ -153,7 +182,7 @@ WebAssembly.instantiateStreaming(fetch('doom.wasm'), importObject)
         number_of_animation_frames = 0;
     }, 1000);
 
-    // Main game loop
+    /*Main game loop*/
     function step(timestamp) {
         ++number_of_animation_frames;
         obj.instance.exports.doom_loop_step();
