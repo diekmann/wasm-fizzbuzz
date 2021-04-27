@@ -37,9 +37,14 @@
 
   <body>
     <h1>DooM</h1>
-    <p>A wasm32 port of 1997 linuxdoom-1.10 with minimal modifications to the <a href="https://github.com/id-Software/DOOM">sources</a>.</p>
+    <p>A wasm32 port of 1997 linuxdoom-1.10 with minimal modifications to the <a href="https://github.com/id-Software/DOOM">sources</a>. Find all the details in the README of the <a href="https://github.com/diekmann/wasm-fizzbuzz">WebAssembly from Scratch Article</a>.</p>
     <p id="focushint"></p>
-    <p>Use enter to start the game, arrow keys to move, ctrl to shoot, spacebar to open gates, alt and arrow keys to strafe (if your browser does not handle these keys otherwise). No mobile touch input supported right now.</p>
+    <p>Use <button id="enterButton">&#x23CE;</button> to start the game, 
+      arrow keys <button id="leftButton">&#x2190;</button> <button id="upButton">&#x2191;</button> <button id="downButton">&#x2193;</button> <button id="rightButton">&#x2192;</button> to move, 
+      <button id="ctrlButton">ctrl</button> to shoot, 
+      spacebar <button id="spaceButton">&nbsp;&nbsp;&nbsp;&nbsp;</button> to open gates, 
+      <button id="altButton">alt</button> and arrow keys to strafe (if your browser does not handle these keys otherwise). 
+      On mobile (and mobile only) touch the buttons above. Yeah, I'm not good a UX design.</p>
     <div class="container">
       <canvas id="screen" width="640" height="400" tabindex="0">This is where the DooM screen should render.</canvas>
       <span>&nbsp;</span>
