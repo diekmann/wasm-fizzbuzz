@@ -88,18 +88,50 @@ extern "C" {
     static gammatable: [[u8; 256]; 5];
 }
 
+struct Palette<'a>(&'a [u8]);
+
+impl<'a> Palette<'a> {
+    unsafe fn from(palette: *const u8) -> Self {
+        Palette(std::slice::from_raw_parts(palette, 256*3))
+    }
+
+    fn into_iter(self) -> PaletteIter<'a> {
+        PaletteIter{
+            p: self.0,
+            i: 0,
+        }
+    }
+}
+
+struct PaletteIter<'a>{
+    p: &'a [u8],
+    i: usize,
+}
+
+impl Iterator for PaletteIter<'_> {
+    type Item = (u8, u8, u8);
+
+    fn next(&mut self) -> Option<(u8, u8, u8)>{
+        let i = self.i;
+        if i >= self.p.len() {
+            return None
+        }
+        self.i += 3;
+        Some((self.p[i], self.p[i+1], self.p[i+2]))
+    }
+}
+
 #[no_mangle]
 extern "C" fn I_SetPalette(palette: *const u8) {
-    let palette = unsafe { std::slice::from_raw_parts(palette, 256*3) };
+    let palette = unsafe { Palette::from(palette) };
     let mut i = 0;
     let gt = unsafe{ gammatable[usegamma as usize] };
-    while i < palette.len() {
-        let r = gt[palette[i]   as usize];
-        let g = gt[palette[i+1] as usize];
-        let b = gt[palette[i+2] as usize];
+    for (i, (r, g, b)) in palette.into_iter().enumerate() {
+        let r = gt[r as usize];
+        let g = gt[g as usize];
+        let b = gt[b as usize];
         let color = RGBAColor(r, g, b, 255);
-        unsafe { COLORMAP[i/3] = color };
-        i += 3;
+        unsafe { COLORMAP[i] = color };
     }
 }
 
