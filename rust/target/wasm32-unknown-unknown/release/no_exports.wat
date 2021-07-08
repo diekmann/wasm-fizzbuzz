@@ -2,8 +2,8 @@
   (type (;0;) (func (param i32)))
   (type (;1;) (func (param i32 i32)))
   (type (;2;) (func))
-  (import "host" "putchar" (func $_ZN4rust7putchar17had2019963628822aE (type 0)))
-  (func $_ZN4rust4puts17h7724885b1133ad25E (type 1) (param i32 i32)
+  (import "host" "putchar" (func $_ZN4rust7putchar17h50f327a5e415075bE (type 0)))
+  (func $_ZN4rust4puts17h1d7869e8df70a060E (type 1) (param i32 i32)
     block  ;; label = @1
       local.get 1
       i32.eqz
@@ -11,7 +11,7 @@
       loop  ;; label = @2
         local.get 0
         i32.load8_u
-        call $_ZN4rust7putchar17had2019963628822aE
+        call $_ZN4rust7putchar17h50f327a5e415075bE
         local.get 0
         i32.const 1
         i32.add
@@ -24,11 +24,11 @@
       end
     end
     i32.const 10
-    call $_ZN4rust7putchar17had2019963628822aE)
+    call $_ZN4rust7putchar17h50f327a5e415075bE)
   (func $rust_begin_unwind (type 2)
     i32.const 1048576
     i32.const 6
-    call $_ZN4rust4puts17h7724885b1133ad25E
+    call $_ZN4rust4puts17h1d7869e8df70a060E
     loop  ;; label = @1
       br 0 (;@1;)
     end)
@@ -56,7 +56,7 @@
           br_if 0 (;@3;)
           i32.const 1048582
           i32.const 8
-          call $_ZN4rust4puts17h7724885b1133ad25E
+          call $_ZN4rust4puts17h1d7869e8df70a060E
           br 1 (;@2;)
         end
         block  ;; label = @3
@@ -66,7 +66,7 @@
           br_if 0 (;@3;)
           i32.const 1048586
           i32.const 4
-          call $_ZN4rust4puts17h7724885b1133ad25E
+          call $_ZN4rust4puts17h1d7869e8df70a060E
           br 1 (;@2;)
         end
         block  ;; label = @3
@@ -76,7 +76,7 @@
           br_if 0 (;@3;)
           i32.const 1048582
           i32.const 4
-          call $_ZN4rust4puts17h7724885b1133ad25E
+          call $_ZN4rust4puts17h1d7869e8df70a060E
           br 1 (;@2;)
         end
         block  ;; label = @3
@@ -143,7 +143,7 @@
                   br 1 (;@6;)
                 end
               end
-              call $_ZN4core9panicking18panic_bounds_check17hea69f7e7489ec724E
+              call $_ZN4core9panicking18panic_bounds_check17hb15177e067923215E
               unreachable
             end
             local.get 2
@@ -151,7 +151,7 @@
             i32.lt_u
             br_if 1 (;@3;)
             local.get 2
-            call $_ZN4core5slice5index24slice_end_index_len_fail17h73468be5102bc4a4E
+            call $_ZN4core5slice5index24slice_end_index_len_fail17hd813cdca00ed590dE
             unreachable
           end
           local.get 0
@@ -162,7 +162,7 @@
         end
         local.get 0
         local.get 2
-        call $_ZN4rust4puts17h7724885b1133ad25E
+        call $_ZN4rust4puts17h1d7869e8df70a060E
       end
       local.get 1
       i32.const 1
@@ -176,16 +176,15 @@
     i32.const 16
     i32.add
     global.set 0)
-  (func $_ZN4core9panicking18panic_bounds_check17hea69f7e7489ec724E (type 2)
-    call $_ZN4core9panicking9panic_fmt17h91d2023e5afe1929E
+  (func $_ZN4core9panicking18panic_bounds_check17hb15177e067923215E (type 2)
+    call $_ZN4core9panicking9panic_fmt17h3ab5417155b7ba3bE
     unreachable)
-  (func $_ZN4core5slice5index24slice_end_index_len_fail17h73468be5102bc4a4E (type 0) (param i32)
-    call $_ZN4core9panicking9panic_fmt17h91d2023e5afe1929E
+  (func $_ZN4core5slice5index24slice_end_index_len_fail17hd813cdca00ed590dE (type 0) (param i32)
+    call $_ZN4core9panicking9panic_fmt17h3ab5417155b7ba3bE
     unreachable)
-  (func $_ZN4core9panicking9panic_fmt17h91d2023e5afe1929E (type 2)
+  (func $_ZN4core9panicking9panic_fmt17h3ab5417155b7ba3bE (type 2)
     call $rust_begin_unwind
     unreachable)
-  (table (;0;) 1 1 funcref)
   (memory (;0;) 17)
   (global (;0;) (mut i32) (i32.const 1048576))
   (global (;1;) i32 (i32.const 1048590))
