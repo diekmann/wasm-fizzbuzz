@@ -67,12 +67,9 @@ window.setInterval(function(){
 }, 1000);
 
 function drawCanvas(ptr) {
-    var doom_screen = new Uint8Array(memory.buffer, ptr, doom_screen_width*doom_screen_height*4);
+    var doom_screen = new Uint8ClampedArray(memory.buffer, ptr, doom_screen_width*doom_screen_height*4)
+    var render_screen = new ImageData(doom_screen, doom_screen_width, doom_screen_height)
     var ctx = canvas.getContext('2d');
-    var render_screen = ctx.createImageData(doom_screen_width, doom_screen_height);
-    for (var i=0; i < render_screen.data.length; ++i) {
-        render_screen.data[i] = doom_screen[i]; // Is there some memcpy in JS?
-    }
 
     ctx.putImageData(render_screen, 0, 0);
 
