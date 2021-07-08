@@ -82,9 +82,57 @@ extern "C" fn I_UpdateNoBlit() {
     // // what is this?
 }
 
+
+extern "C" {
+    static usegamma: c_int;
+    static gammatable: [[u8; 256]; 5];
+}
+
+struct Palette<'a>(&'a [u8]);
+
+impl<'a> Palette<'a> {
+    unsafe fn from(palette: *const u8) -> Self {
+        Palette(std::slice::from_raw_parts(palette, 256*3))
+    }
+
+    fn into_iter(self) -> PaletteIter<'a> {
+        PaletteIter(self.0.into_iter())
+    }
+}
+
+struct PaletteIter<'a>(std::slice::Iter<'a, u8>);
+
+impl Iterator for PaletteIter<'_> {
+    type Item = (u8, u8, u8);
+
+    fn next(&mut self) -> Option<(u8, u8, u8)>{
+        let r = match self.0.next() {
+            Some(r) => *r,
+            None => return None,
+        };
+        let g = match self.0.next() {
+            Some(g) => *g,
+            None => return None,
+        };
+        let b = match self.0.next() {
+            Some(b) => *b,
+            None => return None,
+        };
+        Some((r, g, b))
+    }
+}
+
 #[no_mangle]
-extern "C" fn I_SetPalette(_: i32) {
-    crate::log!("I_SetPalette unimplemented");
+extern "C" fn I_SetPalette(palette: *const u8) {
+    let palette = unsafe { Palette::from(palette) };
+    let gt = unsafe{ gammatable[usegamma as usize] };
+    for (i, (r, g, b)) in palette.into_iter().enumerate() {
+        let r = gt[r as usize];
+        let g = gt[g as usize];
+        let b = gt[b as usize];
+        let color = RGBAColor(r, g, b, 255);
+        unsafe { COLORMAP[i] = color };
+    }
 }
 
 // C libraries
@@ -99,7 +147,7 @@ struct XColor(/*red*/ u16, /*green*/ u16, /*blue*/ u16);
 // The color we use fomr JavaScript to render to the HTML5 canvas.
 #[repr(C)]
 #[repr(packed)]
-#[derive(Clone, Copy)] // TODO: should be possible without those!
+#[derive(Clone, Copy)]
 struct RGBAColor(
     /*red*/ u8,
     /*green*/ u8,
@@ -128,7 +176,7 @@ impl XColor {
 // This needs to be mapped to the real color. Doom has its own mapping.
 // Generated in i_video.c in UploadNewPalette via
 // for (i=0 ; i<256 ; i++){printf("XColor(%hu, %hu, %hu).to_rgba(),\n", colors[i].red, colors[i].green, colors[i].blue);}
-static COLORMAP: [RGBAColor; 256] = [
+static mut COLORMAP: [RGBAColor; 256] = [
     XColor(257, 257, 257).to_rgba(),
     XColor(8224, 6168, 3084).to_rgba(),
     XColor(6168, 4112, 2056).to_rgba(),
@@ -420,8 +468,8 @@ extern "C" fn I_FinishUpdate() {
      for y in 0..SCREENHEIGHT {
          for x in 0..SCREENWIDTH {
              let pixel = the_screen[y*SCREENWIDTH + x] as usize;
-             let rgba_pixel = COLORMAP[pixel];
              unsafe {
+                let rgba_pixel = COLORMAP[pixel];
                 CANVAS[y*MULTIPLY*MULTIPLY*SCREENWIDTH + x*MULTIPLY] = rgba_pixel;
                 CANVAS[y*MULTIPLY*MULTIPLY*SCREENWIDTH + x*MULTIPLY + 1] = rgba_pixel;
                 CANVAS[y*MULTIPLY*MULTIPLY*SCREENWIDTH + SCREENWIDTH*MULTIPLY + x*MULTIPLY] = rgba_pixel;
