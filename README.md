@@ -13,7 +13,7 @@ Non-goal: We will *not* implement our own WebAssembly interpreter or runtime, bu
 
 ---
 
-* Part 1) [Introdcution to WebAssembly](intro_examples/)
+* Part 1) [Introduction to WebAssembly](intro_examples/)
 * Part 2) [Implementing FizzBuzz with WebAssembly by Hand](wat/)
 * Part 3) [Implementing FizzBuzz in Rust and Compiling to WebAssembly](rust/)
 * Part 4) [Porting 1997 DooM to WebAssembly from Scratch](doom/)
