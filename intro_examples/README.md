@@ -1,7 +1,7 @@
 # WebAssembly Crash Course
 
 
-Basically, WebAssemply (wasm for short) is just a language specification.
+Basically, WebAssembly (wasm for short) is just a language specification.
 Despite the name *Web*Assembly, WebAssembly can also be used outside the browser.
 
 Since browsers are huge and complicated, I don't want to start running wasm in a browser.
